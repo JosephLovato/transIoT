@@ -1,0 +1,39 @@
+#menuDiv {
+    position: absolute;
+    top: 0pt; 
+    right: 10px;
+    width: 25%;
+    height: 100vh;
+}
+
+#queryBuilderDiv {
+    padding: 6px;
+    width: 100%;
+    height: 47%;
+    position: relative;
+    margin-bottom: 1%;
+    margin-top: 2%;
+    box-shadow: 10px 5px 10px grey;
+}
+
+#layersDiv {
+    padding: 6px;
+    width: 100%;
+    height: 46%;
+    position: absolute;
+    margin-top: 1%;
+    box-shadow: 10px 5px 10px grey;
+    overflow: hidden;
+}
+
+#layersEdit {
+    overflow-y: clip;
+    display: flex;
+    flex-flow: column;
+    flex: 1 1 100%
+}
+
+.tab-wrapper {
+    margin: 5pt;
+    overflow-y: hidden;
+}

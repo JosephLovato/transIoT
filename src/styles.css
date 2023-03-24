@@ -1,1 +1,20 @@
 /* You can add global styles to this file, and also import other style files */
+
+@import 'https://js.arcgis.com/4.25/@arcgis/core/assets/esri/themes/light/main.css';
+
+html,
+body {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.esri-view .esri-view-surface--inset-outline:focus::after {
+    outline: none !important;
+    /* disable blue outline on map */
+}
+
+.mat-tab-group.mat-tab-fill-height .mat-tab-body-wrapper {
+    flex: 1 1 100%;
+ }

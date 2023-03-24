@@ -1,0 +1,77 @@
+<div class="container">
+    <form [formGroup]="queryForm" (ngSubmit)="onSubmit()">
+        <h3>WHEN</h3>
+        <mat-checkbox formControlName="now">Now</mat-checkbox>
+        <div formGroupName="timeInterval" [hidden]="queryForm.get('now')?.value">
+            <p>Select Date/Time Interval:</p>
+            <mat-form-field>
+                <mat-label>Start</mat-label>
+                <input matInput #pstart [ngxMatDatetimePicker]="pickerFrom" formControlName="start"
+                    placeholder="From date & time">
+                <mat-datepicker-toggle matSuffix [for]="$any(pickerFrom)"></mat-datepicker-toggle>
+                <ngx-mat-datetime-picker #pickerFrom [enableMeridian]="true"></ngx-mat-datetime-picker>
+            </mat-form-field>
+
+            <mat-form-field>
+                <mat-label>To</mat-label>
+                <input matInput [ngxMatDatetimePicker]="pickerTo" formControlName="end" placeholder="To date & time"
+                    [min]="queryForm.get('timeInterval')?.get('start')">
+                <mat-datepicker-toggle matSuffix [for]="$any(pickerTo)"></mat-datepicker-toggle>
+                <ngx-mat-datetime-picker #pickerTo [enableMeridian]="true"></ngx-mat-datetime-picker>
+            </mat-form-field>
+        </div>
+        <mat-divider></mat-divider>
+        <h3>WHERE</h3>
+        <div class="where-clauses" formArrayName="whereClauses">
+            <div *ngFor="let clause of whereClauses.controls; let i=index">
+                <!-- The repeated alias template -->
+
+                <div class="clause-container" [formGroupName]="i">
+
+                    <mat-form-field class="clause-attr clause-member" appearance="fill">
+                        <mat-label>Attribute</mat-label>
+                        <mat-select name="attr" formControlName="attribute">
+                            <mat-option *ngFor="let attr of attributes" [value]="attr.key">
+                                {{attr.name}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field class="clause-op clause-member" appearance="fill">
+                        <mat-label>Op</mat-label>
+                        <mat-select name="op" formControlName="operator">
+                            <mat-option *ngFor="let op of whereOps" [value]="op">
+                                {{op}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field class="clause-key clause-member" appearance="fill">
+                        <mat-label>{{ clause.get('attribute')!.value}}</mat-label>
+                        <input matInput name="key" formControlName="key">
+                    </mat-form-field>
+                    
+                    <div *ngIf="clause.get('attribute')!.value == 'route_id'">
+                        <mat-form-field class="clause-key clause-member" appearance="fill">
+                            <mat-label> </mat-label>
+                            <input matInput name="key" formControlName="key">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="remove-clause">
+                        <button mat-mini-fab color="warn" (click)="removeWhereClause(i)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="clause-adder">
+                <button mat-raised-button type="button" color="primary" (click)="addWhereClause()">+ Add Clause</button>
+            </div>
+        </div>
+        <mat-divider></mat-divider>
+        <div class="submit-button">
+            <button mat-raised-button color="accent" type="submit" [disabled]="!queryForm.valid">Submit</button>
+        </div>
+    </form>
+</div>

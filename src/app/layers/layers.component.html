@@ -1,0 +1,27 @@
+<div class="button-container">
+  <button mat-raised-button>Basic</button>
+</div>
+<mat-divider></mat-divider>
+<div cdkScrollable class="scroll-container">
+  <div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
+    <div class="example-box" *ngFor="let l of layersByQuery" cdkDrag>
+      <div class="example-custom-placeholder" *cdkDragPlaceholder></div>
+      <mat-checkbox></mat-checkbox>
+      <div>
+        <button [(colorPicker)]="l.color" [cpCancelButton]="true" [cpOKButton]="true" [cpCloseClickOutside]="true"
+          [cpUseRootViewContainer]="true" (colorPickerClose)="changeColor(l)" mat-icon-button>
+          <mat-icon [style.color]="l.color">palette</mat-icon>
+        </button>
+      </div>
+      {{l.view()}}
+      <div class="buttons">
+        <button mat-icon-button (click)="toggleVisibility(l)">
+          <mat-icon>{{l.visible ? 'visibility' : 'visibility_off'}}</mat-icon>
+        </button>
+        <button mat-icon-button>
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
