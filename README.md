@@ -1,6 +1,8 @@
 # TransIoT
+![example workflow](https://github.com/JosephLovato/transIoT/actions/workflows/node.js.yml/badge.svg)
 
 A map-based web application which allows users to visually inspect and manipulate real-time transit data from Denver's RTD public transportation system. 
+
 
 # Tools Used
 
