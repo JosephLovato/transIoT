@@ -12,5 +12,8 @@
   "license": "ISC",
   "devDependencies": {
     "jest": "^29.5.0"
+  },
+  "dependencies": {
+    "@influxdata/influxdb-client": "^1.33.2"
   }
 }
