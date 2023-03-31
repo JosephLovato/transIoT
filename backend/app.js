@@ -30,6 +30,7 @@ app.use((req, res, next) => {
 
 app.get("/api/realtime/vehicle_position", async (req, res, next) => {
     try {
+        console.log(req.query.whereClauses);
         const response = await fetch("https://www.rtd-denver.com/files/gtfs-rt/VehiclePosition.pb");
         if (!response.ok) {
             const error = new Error(`${response.url}: ${response.status} ${response.statusText}`);

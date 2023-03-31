@@ -19,6 +19,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider'
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { ScrollingModule } from '@angular/cdk/scrolling';
+import { MatTreeModule } from '@angular/material/tree'
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip'
+
 
 import { ColorPickerModule } from 'ngx-color-picker';
 
@@ -33,6 +37,8 @@ import { AppComponent } from './app.component';
 import { EsriMapComponent } from './esri-map/esri-map.component';
 import { VehiclePositionComponent } from './query-builders/vehicle-position/vehicle-position.component';
 import { LayersComponent } from './layers/layers.component';
+import { WhereClauseDialog } from './query-builders/where-clause-dialog/where-clause-dialog.component';
+import { ClauseTreeComponent } from './query-builders/clause-tree/clause-tree.component';
 
 @NgModule({
   declarations: [
@@ -40,6 +46,8 @@ import { LayersComponent } from './layers/layers.component';
     EsriMapComponent,
     VehiclePositionComponent,
     LayersComponent,
+    ClauseTreeComponent,
+    WhereClauseDialog
   ],
   imports: [
     BrowserModule,
@@ -62,11 +70,14 @@ import { LayersComponent } from './layers/layers.component';
     MatSelectModule,
     MatIconModule,
     MatDividerModule,
+    MatTreeModule,
+    MatDialogModule,
+    MatTooltipModule,
     DragDropModule,
     ScrollingModule,
-    ColorPickerModule
+    ColorPickerModule,
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
 export class AppModule { }

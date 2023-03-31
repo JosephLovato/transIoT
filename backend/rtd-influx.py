@@ -27,7 +27,7 @@ from google.transit import gtfs_realtime_pb2 as gtfs
 # url requesting
 from urllib.request import Request, urlopen, urlretrieve
 
-sample_rate = 1
+sample_rate = 40
 ingest_count = 0
 
 # Setup Influx API

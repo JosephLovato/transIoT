@@ -1,0 +1,17 @@
+# node
+node_modules
+
+# logs
+/logs
+
+# vscode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+.vscode
+
+# misc
+tmp-prev.txt

@@ -27,7 +27,10 @@ export class DataService {
         throw Error(`Query type not support: ${query.type}`)
     }
     var url_with_params = new URL(url);
-    // TODO: Add params/filters
+    // build and add where clause filters from NodeClause tree
+    let result = query.whereClauses.toJson();
+      url_with_params.searchParams.append('whereClauses', JSON.stringify(result));
+
 
     var obvs = this.http.get<FeedMessage>(url_with_params.toString())
 
@@ -37,7 +40,6 @@ export class DataService {
         return this.handleError(err, "getData");
       })
     ).subscribe(feed => {
-      console.log("wow how");
       this.newLayers.next({
         query: query,
         feedMessage: feed
