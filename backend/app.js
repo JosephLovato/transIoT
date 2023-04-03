@@ -3,8 +3,7 @@
 import express from 'express';
 import bodyparser from 'body-parser'
 
-import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
-import fetch from 'node-fetch';
+import { InfluxClient } from './influx-client.js';
 
 const app = express();
 
@@ -30,18 +29,12 @@ app.use((req, res, next) => {
 
 app.get("/api/realtime/vehicle_position", async (req, res, next) => {
     try {
-        console.log(req.query.whereClauses);
-        const response = await fetch("https://www.rtd-denver.com/files/gtfs-rt/VehiclePosition.pb");
-        if (!response.ok) {
-            const error = new Error(`${response.url}: ${response.status} ${response.statusText}`);
-            res.status(500).send("Error in fetching vehicle position proto buffer form RTD real-time API");
-        } else {
-            const buffer = await response.arrayBuffer();
-            const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(
-                new Uint8Array(buffer)
-            );
-            res.status(201).json(feed.toJSON());
+        let client = new InfluxClient();
+        let filterExpr = 'true';
+        if (req.query.whereClauses != undefined) {
+            filterExpr = client.buildFilterExpression(req.query.whereClauses);
         }
+        res.status(201).send(await client.queryCurrentVehiclePosition(filterExpr));
     } catch (error) {
         console.error(error)
         res.status(500).send("An error occurred while fetching the vehicle position proto buffer from the RTD real-time API");

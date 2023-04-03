@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { DataService } from './data.service';
-import { ProtoBufferLayer } from './proto-buffer-layer.model';
+import { RawDataLayer } from './layer-types';
 import Layer from '@arcgis/core/layers/Layer';
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import SimpleRenderer from '@arcgis/core/renderers/SimpleRenderer'
@@ -9,6 +9,7 @@ import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
 import Graphic from '@arcgis/core/Graphic';
 import GeometryProperties from '@arcgis/core/geometry/Point';
 import Color from "@arcgis/core/Color.js";
+import { VehiclePositionPoint } from './query-builders/vehicle-position/vehicle-positition-query.model';
 
 @Injectable({
   providedIn: 'root'
@@ -39,7 +40,7 @@ export class LayersService {
     this.layers.get(id)!.visible = !this.layers.get(id)?.visible;
   }
 
-  addLayerFromRaw(layer: ProtoBufferLayer) {
+  async addVehiclePositionPointLayer(layer: RawDataLayer) {
     // setup layer
     // TODO do this in a separate function
     const newLayer = new FeatureLayer({
@@ -50,13 +51,13 @@ export class LayersService {
           type: "oid"
         },
         {
-          name: "name",
-          alias: "name",
-          type: "string"
+          name: "time",
+          alias: "time",
+          type: "date"
         },
         {
-          name: "timestamp",
-          alias: "timestamp",
+          name: "trip_id",
+          alias: "trip_id",
           type: "string"
         },
         {
@@ -65,18 +66,53 @@ export class LayersService {
           type: "string"
         },
         {
+          name: "direction_id",
+          alias: "direction_id",
+          type: "string"
+        },
+        {
+          name: "schedule_relationship",
+          alias: "schedule_relationship",
+          type: "string"
+        },
+        {
+          name: "vehicle_id",
+          alias: "vehicle_id",
+          type: "string"
+        },
+        {
+          name: "vehicle_label",
+          alias: "vehicle_label",
+          type: "string"
+        },
+        {
+          name: "latitude",
+          alias: "latitude",
+          type: "double"
+        },
+        {
+          name: "longitude",
+          alias: "longitude",
+          type: "double"
+        },
+        {
+          name: "bearing",
+          alias: "bearing",
+          type: "double"
+        },
+        {
           name: "stop_id",
           alias: "stop_id",
-          type: "integer"
+          type: "string"
         },
         {
           name: "current_status",
           alias: "current_status",
-          type: "integer"
+          type: "string"
         }
       ],
       objectIdField: "ObjectID",
-      id: layer.query.time.getTime().toString(), // id of layer is
+      id: layer.query.time.getTime().toString(), // id of layer is time of query
       outFields: ["*"],
       geometryType: "point",
       renderer: new SimpleRenderer({
@@ -92,110 +128,68 @@ export class LayersService {
         })
       }),
       popupTemplate: {
-        title: "ID: {name}",
+        title: "ID: {vehicle_id}",
         // content: popup_content_rt
       },
       source: []
     });
 
     // populate layer with data
-    const graphics = layer.feedMessage.entity.map(entity => {
-      let vehicle = entity.vehicle!;
+    let data = layer.data.data as VehiclePositionPoint[];
+    const graphics = data.map(x => {
       var point = {
         type: "point", // autocasts as new Polyline()
-        latitude: vehicle.position!.latitude,
-        longitude: vehicle.position!.longitude
+        latitude: x.latitude,
+        longitude: x.longitude
       };
-
-      var timeStampDate = new Date(0); // The 0 there is the key, which sets the date to the epoch
-      timeStampDate.setUTCSeconds(vehicle.timestamp! as number);
-      //console.log(locationObject);
       var attributes;
-      if (vehicle.trip === null || vehicle.trip === undefined) {
+      // this still exists because "supposedly" if the bus 
+      // is not on a trip, its route_id, stop_id, and current_status are null
+      if (x.trip_id === null || x.trip_id === undefined) {
         //console.log(locationObject);
         attributes = {
-          name: vehicle.vehicle!.id,
-          timestamp: timeStampDate.toTimeString(),
-          route_id: -1,
-          stop_id: -1,
-          current_status: -1
+          time: new Date(x._time).getTime(),
+          trip_id: x.trip_id,
+          route_id: x.route_id,
+          direction_id: x.direction_id,
+          schedule_relationship: x.schedule_relationship,
+          vehicle_id: x.vehicle_id,
+          vehicle_label: x.vehicle_label,
+          latitude: x.latitude,
+          longitude: x.longitude,
+          bearing: x.bearing,
+          stop_id: x.stop_id,
+          current_status: x.current_status,
+          // route_id: "",
+          // stop_id: "",
+          // current_status: ""
         };
       } else {
         attributes = {
-          name: vehicle.vehicle!.id,
-          timestamp: timeStampDate.toTimeString(),
-          route_id: vehicle.trip!.routeId,
-          stop_id: vehicle.stopId,
-          current_status: vehicle.currentStatus?.toString()
+          time: new Date(x._time).getTime(),
+          trip_id: x.trip_id,
+          route_id: x.route_id,
+          direction_id: x.direction_id,
+          schedule_relationship: x.schedule_relationship,
+          vehicle_id: x.vehicle_id,
+          vehicle_label: x.vehicle_label,
+          latitude: x.latitude,
+          longitude: x.longitude,
+          bearing: x.bearing,
+          stop_id: x.stop_id,
+          current_status: x.current_status,
         };
       }
-
       return new Graphic({
         geometry: point as GeometryProperties,
         attributes: attributes,
       });
     });
-
     // add graphics to layer
-    newLayer.applyEdits({ addFeatures: graphics })
-
+    await newLayer.applyEdits({ addFeatures: graphics });
     // save layer and tell map component to add the layer
     this.layers.set(newLayer.id, newLayer);
     this.addLayer.next(newLayer.id);
   }
-
-  // updateLayer(featureLayer: FeatureLayer, feed: FeedMessage[]) {
-
-
-  //   // Add all the locations to the map:
-  //   const graphics = locations.map(locationObject => {
-  //     var point = {
-  //       type: "point", // autocasts as new Polyline()
-  //       latitude: locationObject.vehicle.position.latitude,
-  //       longitude: locationObject.vehicle.position.longitude
-  //     };
-
-  //     var timeStampDate = new Date(0); // The 0 there is the key, which sets the date to the epoch
-  //     timeStampDate.setUTCSeconds(locationObject.vehicle.timestamp);
-  //     //console.log(locationObject);
-  //     var attributes;
-  //     if (locationObject.vehicle.trip === null) {
-  //       //console.log(locationObject);
-  //       attributes = {
-  //         name: locationObject.vehicle.vehicle.id,
-  //         timestamp: timeStampDate.toTimeString(),
-  //         route_id: -1,
-  //         stop_id: -1,
-  //         current_status: -1
-  //       };
-  //     } else {
-  //       attributes = {
-  //         name: locationObject.vehicle.vehicle.id,
-  //         timestamp: timeStampDate.toTimeString(),
-  //         route_id: locationObject.vehicle.trip.route_id,
-  //         stop_id: locationObject.vehicle.stop_id,
-  //         current_status: locationObject.vehicle.current_status
-  //       };
-  //     }
-
-  //     return new Graphic({
-  //       geometry: point,
-  //       attributes: attributes,
-  //     });
-  //   });
-
-  //   // first clear out the graphicsLayer
-  //   // console.log('featureLayer:', featureLayer);
-  //   await layerView.queryFeatures().then(async (results) => {
-  //     await featureLayer.applyEdits({
-  //       deleteFeatures: results.features,
-  //       addFeatures: graphics
-  //     });
-  //     console.log("UPDATE deleted:", results.features);
-  //   });
-
-  // };
-
-
 
 }

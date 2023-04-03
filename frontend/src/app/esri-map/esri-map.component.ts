@@ -19,7 +19,7 @@ export class EsriMapComponent implements OnInit, OnDestroy {
   ) { }
 
   @ViewChild('mapViewNode', { static: true }) private mapViewEl!: ElementRef;
-  
+
 
   initializeMap(): Promise<any> {
     const container = this.mapViewEl.nativeElement;
@@ -45,7 +45,7 @@ export class EsriMapComponent implements OnInit, OnDestroy {
     })
     this.addLayerSub$ = this.layersService.addLayer$
       .subscribe((id: string) => {
-        this.view.map.add(this.layersService.getLayer(id)!);
+        this.view.map.add(this.layersService.getLayer(id)!);        
       })
   }
 

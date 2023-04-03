@@ -34,7 +34,7 @@ ingest_count = 0
 # NOTE: Change these when deploying on AWS (or better yet, learn docker)
 token = os.getenv("INFLUX_TOKEN")
 org = "rtd-local"
-bucket = "RTD-GTFS"
+bucket = "RTD-GTFS-NEW"
 url = "http://localhost:8086"
 
 # Setup Logging
@@ -60,27 +60,26 @@ def ingest_to_influx(req):
         points = []
         for entity in feed.entity:
             point = Point("vehicle_position") \
-                .tag("trip_id", entity.vehicle.trip.trip_id) \
+                .field("trip_id", entity.vehicle.trip.trip_id) \
                 .tag("route_id", entity.vehicle.trip.route_id) \
                 .tag("direction_id", entity.vehicle.trip.direction_id) \
                 .tag("schedule_relationship", entity.vehicle.trip.schedule_relationship) \
                 .tag("vehicle_id",  entity.vehicle.vehicle.id) \
                 .tag("vehicle_label", entity.vehicle.vehicle.label) \
-                .tag("stop_id", entity.vehicle.stop_id) \
+                .field("stop_id", entity.vehicle.stop_id) \
                 .tag("current_status", entity.vehicle.current_status) \
                 .time(entity.vehicle.timestamp, WritePrecision.S) \
                 .field("latitude", entity.vehicle.position.latitude) \
                 .field("longitude", entity.vehicle.position.longitude) \
                 .field("bearing", entity.vehicle.position.bearing)
             points.append(point)
-        write_api.write(bucket, org, points)
+        write_api.write(bucket, org, points, write_precision=WritePrecision.S)
         ingest_count += 1
-        logging.info("Ingested unique RTD data: count = %d" % (ingest_count))
+        logging.info("Ingested unique RTD data to %s: count = %d" %
+                     (bucket, ingest_count))
 
 
 while True:
-    time.sleep(sample_rate)
-
     # Retrieve protobuf file via RTD's restful API
     req = Request('https://www.rtd-denver.com/files/gtfs-rt/VehiclePosition.pb',
                   headers={'User-Agent': 'Mozilla/5.0'})
@@ -99,3 +98,5 @@ while True:
 
     # Move current file to previous for next comparison
     os.rename("tmp-now.txt", "tmp-prev.txt")
+
+    time.sleep(sample_rate)

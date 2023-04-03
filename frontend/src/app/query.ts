@@ -5,6 +5,7 @@ export abstract class Query {
     visible: boolean = true;
     color: string;
     whereClauses: ClauseNode = new ClauseNode();
+    layerType: LayerType;
     abstract type: QueryType;
     abstract name: string;
     abstract view(): string;
@@ -13,6 +14,11 @@ export abstract class Query {
 
 export enum QueryType {
     VehiclePosition = "Vehicle Position"
+}
+
+export enum LayerType {
+    Point = "Point",
+    Line = "Line"
 }
 
 export type Attributes = { [key: string]: Attribute }

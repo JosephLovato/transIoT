@@ -1,9 +1,10 @@
-import { Attribute, Attributes, Query, QueryType } from 'src/app/query';
+import { Attribute, Attributes, LayerType, Query, QueryType } from 'src/app/query';
 
 export class VehiclePositionQuery extends Query {
     type = QueryType.VehiclePosition;
     name;
     now: boolean = true;
+    range: boolean = false;
     timeInterval?: {
         start: Date,
         end: Date
@@ -47,4 +48,19 @@ export const vehiclePositionAttributes: Attributes = {
         }
     }
 };
+
+export interface VehiclePositionPoint {
+    _time: string;
+    trip_id: string;
+    route_id: string;
+    direction_id: string;
+    schedule_relationship: string;
+    vehicle_id: string;
+    vehicle_label: string;
+    latitude: number;
+    longitude: number;
+    bearing: number;
+    stop_id: string;
+    current_status: string;
+}
 

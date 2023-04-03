@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject, catchError, of, tap, throwError } from 'rxjs';
-import { ProtoBufferLayer } from './proto-buffer-layer.model';
 import { Query, QueryType } from './query';
 import { transit_realtime } from 'gtfs-realtime-bindings';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { VehiclePositionPoint } from './query-builders/vehicle-position/vehicle-positition-query.model';
+import { RawDataLayer } from './layer-types';
 
 type FeedMessage = transit_realtime.FeedMessage;
 
@@ -11,7 +12,7 @@ type FeedMessage = transit_realtime.FeedMessage;
   providedIn: 'root'
 })
 export class DataService {
-  private newLayers = new Subject<ProtoBufferLayer>();
+  private newLayers = new Subject<RawDataLayer>();
   public newLayers$ = this.newLayers.asObservable();
   private baseUrl = "http://localhost:3000/api/realtime/"
 
@@ -28,21 +29,24 @@ export class DataService {
     }
     var url_with_params = new URL(url);
     // build and add where clause filters from NodeClause tree
-    let result = query.whereClauses.toJson();
+    if (query.whereClauses != null) {
+      let result = query.whereClauses.toJson();
       url_with_params.searchParams.append('whereClauses', JSON.stringify(result));
+    }
+    // TODO: Add time parameters
 
 
-    var obvs = this.http.get<FeedMessage>(url_with_params.toString())
+    var obvs = this.http.get<any>(url_with_params.toString())
 
     obvs.pipe(
       tap(_ => console.log("[Data-Service] Fetched vehicle position query from backend")),
       catchError(err => {
         return this.handleError(err, "getData");
       })
-    ).subscribe(feed => {
+    ).subscribe(response => {
       this.newLayers.next({
         query: query,
-        feedMessage: feed
+        data: response
       });
     });
     return obvs;

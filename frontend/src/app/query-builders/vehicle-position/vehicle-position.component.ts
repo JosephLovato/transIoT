@@ -9,6 +9,7 @@ import { DataService } from 'src/app/data.service';
 import { Observable, catchError, throwError } from 'rxjs';
 import { WhereClauseDialog } from '../where-clause-dialog/where-clause-dialog.component';
 import { dialogflow_v2beta1 } from 'googleapis';
+import { LayerType } from 'src/app/query';
 
 @Component({
   selector: 'app-vehicle-position',
@@ -40,7 +41,7 @@ export class VehiclePositionComponent implements OnInit {
         start: new FormControl<Date | null>(null),
         end: new FormControl<Date | null>(null)
       }),
-      whereClauses: new ClauseNode()
+      whereClauses: new FormControl<ClauseNode | null>(null)
     })
   }
 
@@ -51,17 +52,25 @@ export class VehiclePositionComponent implements OnInit {
     var query: VehiclePositionQuery =
       new VehiclePositionQuery(this.queryForm.value as any, this.sequence);
     this.sequence++;
+    
+    // set layer type based on user's time input
+    query.layerType = (query.now || !query.range) ? LayerType.Point : LayerType.Line;
+
     console.info("[Vehicle-Position-Component] Submitting query: ", query)
+
     // call data service to fetch query
     this.dataService.getData(query)
       .pipe(catchError(err => {
         this.sequence--;
         return new Observable();
-      })).subscribe(_ => console.log('hi'));
- 
+      })).subscribe(_ => true);
+
     // reset form
     this.initializeForm();
   }
 
+  onAddClauses() {
+    this.queryForm.get('whereClauses')?.setValue(new ClauseNode);
+  }
 
 }

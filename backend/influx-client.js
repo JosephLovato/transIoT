@@ -11,9 +11,14 @@ const token = process.env.INFLUX_TOKEN
 const org = "rtd-local"
 
 
-export class influxClient {
+export class InfluxClient {
     queryApi = new InfluxDB({ url, token }).getQueryApi(org);
 
+    /**
+     * Converts nested where clause json object to filter expression 
+     * @param {*} whereClauses 
+     * @returns string
+     */
     buildFilterExpression(whereClauses) {
         // logical operator
         if (whereClauses.hasOwnProperty('logicalOperator')) {
@@ -27,31 +32,33 @@ export class influxClient {
             return expr;
             // clause
         } else {
-            return `r[${whereClauses.attribute}] ${whereClauses.operator} "${whereClauses.value}"`;
+            return `r["${whereClauses.attribute}"] ${whereClauses.operator} ${whereClauses.value}`;
         }
     }
 
-    
-}
-
-
-const fluxQuery = `
-    from(bucket: "RTD-GTFS")
-        |> range(start: -5m, stop: now())
-        |> filter(fn: (r) => r["_field"] == "bearing" or r["_field"] == "latitude" or r["_field"] == "longitude")
-        |> pivot(columnKey: ["_field"], rowKey: ["_time", "vehicle_id"], valueColumn: "_value")
-        |> group(columns: ["vehicle_id"])
-        |> drop(columns: ["_start", "_stop", "_measurement"])`
-
-const myQuery = async () => {
-    var d = new Map();
-    for await (const { values, tableMeta } of queryApi.iterateRows(fluxQuery)) {
-        console.log("wow");
-        const o = tableMeta.toObject(values)
-        d[o.vehicle_id] += o;
+    /**
+     * Query InfluxDB for the real-time vehicle positions with an option filter expression
+     * @param {string} filterExpr 
+     * @returns json object with metadata and query result
+     */
+    async queryCurrentVehiclePosition(filterExpr = '') {
+        let fluxQuery = `
+        from(bucket: "RTD-GTFS-NEW")
+            |> range(start: -5m, stop: now())
+            |> pivot(columnKey: ["_field"], rowKey: ["_time", "vehicle_id"], valueColumn: "_value")
+            |> filter(fn: (r) => ${filterExpr})
+            |> group(columns: ["vehicle_id"])
+            |> max(column: "_time") 
+            |> drop(columns: ["_start", "_stop", "_measurement"])`
+        let result = [];
+        for await (const { values, tableMeta } of this.queryApi.iterateRows(fluxQuery)) {
+            result.push(tableMeta.toObject(values));
+        }
+        return {
+            timeStamp: Date.now().valueOf(),
+            numDataPoints: result.length,
+            data: result
+        }
     }
-    console.log(d)
-}
 
-/** Execute a query and receive line table metadata and rows. */
-// myQuery()
+}

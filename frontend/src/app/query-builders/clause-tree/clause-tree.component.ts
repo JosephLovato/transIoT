@@ -28,7 +28,8 @@ export class ClauseTreeComponent implements OnInit {
   });
   dataSource = new MatTreeNestedDataSource<ClauseNode>();
   dataChange = new BehaviorSubject<ClauseNode[]>([]);
-  currentNode: ClauseNode;
+  // * Delete
+  // currentNode: ClauseNode;
 
   get data(): ClauseNode[] {
     return this.dataChange.value;
