@@ -3,7 +3,7 @@ import { NestedTreeControl } from '@angular/cdk/tree';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { Dialog, DialogRef } from '@angular/cdk/dialog'
 import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { VehiclePositionQuery, vehiclePositionAttributes } from './vehicle-positition-query.model';
+import { TemporalType, VehiclePositionQuery, vehiclePositionAttributes } from './vehicle-positition-query.model';
 import { ClauseNode, LogicalOperator, Operator, WhereClause } from '../../where-clauses';
 import { DataService } from 'src/app/data.service';
 import { Observable, catchError, throwError } from 'rxjs';
@@ -17,11 +17,13 @@ import { LayerType } from 'src/app/query';
   styleUrls: ['./vehicle-position.component.css']
 })
 export class VehiclePositionComponent implements OnInit {
-
   sequence = 1;
   submitted = false;
+  whereClausesPresent = false;
+  refresh: number = 0;
   queryForm!: FormGroup;
   attributes = vehiclePositionAttributes;
+  temporalTypes = Object.values(TemporalType);
 
   constructor(
     private fb: FormBuilder,
@@ -32,17 +34,20 @@ export class VehiclePositionComponent implements OnInit {
 
   ngOnInit(): void {
     this.initializeForm();
+    this.submitted = false;
+    this.whereClausesPresent = false;
   }
 
   initializeForm() {
     this.queryForm = this.fb.group({
-      now: true,
+      temporalType: TemporalType.Now,
+      pastTime: new FormControl<Date | null>(null),
       timeInterval: this.fb.group({
         start: new FormControl<Date | null>(null),
         end: new FormControl<Date | null>(null)
       }),
-      whereClauses: new FormControl<ClauseNode | null>(null)
-    })
+      whereClauses: new ClauseNode()
+    });
   }
 
 
@@ -52,25 +57,40 @@ export class VehiclePositionComponent implements OnInit {
     var query: VehiclePositionQuery =
       new VehiclePositionQuery(this.queryForm.value as any, this.sequence);
     this.sequence++;
-    
-    // set layer type based on user's time input
-    query.layerType = (query.now || !query.range) ? LayerType.Point : LayerType.Line;
 
+    // set layer type based on user's time input
+    query.layerType = (query.temporalType == TemporalType.Interval) ? LayerType.Line : LayerType.Point;
+
+    // null out where clauses if not present
+    if (!this.whereClausesPresent) {
+      query.whereClauses = null;
+    }
     console.info("[Vehicle-Position-Component] Submitting query: ", query)
 
     // call data service to fetch query
     this.dataService.getData(query)
+      // catch any errors from the result of the query
       .pipe(catchError(err => {
+        console.log("ERROR");
         this.sequence--;
         return new Observable();
-      })).subscribe(_ => true);
+      })).subscribe(result => {
+        // if no errors, reinitialize and tell clause tree to refresh
+        console.log("HERE", result);
+        // reset component
+        this.ngOnInit();
+        this.refresh++;
+      });
 
-    // reset form
-    this.initializeForm();
+
   }
 
   onAddClauses() {
-    this.queryForm.get('whereClauses')?.setValue(new ClauseNode);
+    this.whereClausesPresent = true;
+  }
+
+  rootNodeDeleted() {
+    this.whereClausesPresent = false;
   }
 
 }

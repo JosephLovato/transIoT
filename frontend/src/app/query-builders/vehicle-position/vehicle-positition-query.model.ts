@@ -1,10 +1,8 @@
 import { Attribute, Attributes, LayerType, Query, QueryType } from 'src/app/query';
 
 export class VehiclePositionQuery extends Query {
-    type = QueryType.VehiclePosition;
-    name;
-    now: boolean = true;
-    range: boolean = false;
+    temporalType: TemporalType;
+    pastTime?: Date;
     timeInterval?: {
         start: Date,
         end: Date
@@ -14,11 +12,18 @@ export class VehiclePositionQuery extends Query {
         super();
         Object.assign(this, init);
         this.name = `Vehicle Position Query (${sequence})`;
+        this._type = QueryType.VehiclePosition;
     }
 
     view(): string {
         return this.name;
     }
+}
+
+export enum TemporalType {
+    Now = "now",
+    Past = "past",
+    Interval = "interval"
 }
 
 export const vehiclePositionAttributes: Attributes = {

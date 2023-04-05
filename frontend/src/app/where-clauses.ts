@@ -27,7 +27,8 @@ export class ClauseNode {
         public logicalOperator: LogicalOperator = LogicalOperator.None,
         public whereClause: WhereClause = { attribute: '', operator: Operator.None, value: '' },
         public children: ClauseNode[] = [],
-        public id: number = getUniqueId()
+        public id: number = getUniqueId(),
+        public parent: ClauseNode | null = null
     ) {
         this.logicalOperator = logicalOperator;
         this.whereClause = whereClause;

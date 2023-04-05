@@ -1,16 +1,20 @@
 import { ClauseNode, WhereClause } from "./where-clauses";
 
 export abstract class Query {
-    time: Date = new Date();
+    protected _time: Date = new Date();
+    protected _type: QueryType;
     visible: boolean = true;
     color: string;
-    whereClauses: ClauseNode = new ClauseNode();
+    whereClauses: ClauseNode | null = new ClauseNode();
     layerType: LayerType;
-    abstract type: QueryType;
-    abstract name: string;
+    name: string;
     abstract view(): string;
-    get id(): string { return this.time.getTime().toString() };
+    get id(): string { return this._time.getTime().toString() };
+    public get type(): QueryType { return this._type };
+    public get time(): Date { return this._time };
+
 }
+
 
 export enum QueryType {
     VehiclePosition = "Vehicle Position"

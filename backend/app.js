@@ -32,7 +32,7 @@ app.get("/api/realtime/vehicle_position", async (req, res, next) => {
         let client = new InfluxClient();
         let filterExpr = 'true';
         if (req.query.whereClauses != undefined) {
-            filterExpr = client.buildFilterExpression(req.query.whereClauses);
+            filterExpr = client.buildFilterExpression(JSON.parse(req.query.whereClauses));
         }
         res.status(201).send(await client.queryCurrentVehiclePosition(filterExpr));
     } catch (error) {

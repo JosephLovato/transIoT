@@ -1,31 +1,45 @@
 <div class="container">
     <form [formGroup]="queryForm" (ngSubmit)="onSubmit()">
         <h3>WHEN</h3>
-        <mat-checkbox formControlName="now">Now</mat-checkbox>
-        <div formGroupName="timeInterval" [hidden]="queryForm.get('now')?.value">
-            <p>Select Date/Time Interval:</p>
+        <mat-form-field appearance="outline">
+            <mat-label>Type</mat-label>
+            <mat-select name="temporalType" formControlName="temporalType">
+                <mat-option *ngFor="let type of temporalTypes" [value]="type">
+                    {{type}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+        <div [hidden]="queryForm.get('temporalType')?.value != 'past'">
+            <mat-form-field>
+                <input matInput #ppast [ngxMatDatetimePicker]="pickerPast" formControlName="pastTime"
+                    placeholder="date & time">
+                <mat-datepicker-toggle matSuffix [for]="$any(pickerPast)"></mat-datepicker-toggle>
+                <ngx-mat-datetime-picker #pickerPast [enableMeridian]="true"></ngx-mat-datetime-picker>
+            </mat-form-field>
+        </div>
+        <div formGroupName="timeInterval" [hidden]="queryForm.get('temporalType')?.value != 'interval'">
             <mat-form-field>
                 <mat-label>Start</mat-label>
                 <input matInput #pstart [ngxMatDatetimePicker]="pickerFrom" formControlName="start"
-                    placeholder="From date & time">
+                    placeholder="Start date & time">
                 <mat-datepicker-toggle matSuffix [for]="$any(pickerFrom)"></mat-datepicker-toggle>
                 <ngx-mat-datetime-picker #pickerFrom [enableMeridian]="true"></ngx-mat-datetime-picker>
             </mat-form-field>
 
             <mat-form-field>
-                <mat-label>To</mat-label>
-                <input matInput [ngxMatDatetimePicker]="pickerTo" formControlName="end" placeholder="To date & time"
-                    [min]="queryForm.get('timeInterval')?.get('start')">
+                <mat-label>End</mat-label>
+                <input matInput #pend [ngxMatDatetimePicker]="pickerTo" formControlName="end"
+                    placeholder="End date & time" [min]="queryForm.get('timeInterval')?.get('start')">
                 <mat-datepicker-toggle matSuffix [for]="$any(pickerTo)"></mat-datepicker-toggle>
                 <ngx-mat-datetime-picker #pickerTo [enableMeridian]="true"></ngx-mat-datetime-picker>
             </mat-form-field>
         </div>
         <mat-divider></mat-divider>
         <h3>WHERE</h3>
-        <div *ngIf="queryForm.get('whereClauses') == null">
-            <button mat-raised-button type="button" (click)="onAddClauses()">Add clauses</button>
+        <div *ngIf="!whereClausesPresent">
+            <button mat-raised-button type="button" color="primary" class="add-clause-button" (click)="onAddClauses()">Add clauses</button>
         </div>
-        <app-clause-tree [attributes]="attributes" formName="whereClauses"></app-clause-tree>
+        <app-clause-tree [attributes]="attributes" [refresh]="refresh" (rootNodeDeleted)="rootNodeDeleted()" formName="whereClauses" [hidden]="!whereClausesPresent"></app-clause-tree>
         <mat-divider></mat-divider>
         <div class="submit-button">
             <button mat-raised-button color="accent" type="submit" [disabled]="!queryForm.valid">Submit</button>

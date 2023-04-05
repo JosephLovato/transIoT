@@ -95,7 +95,8 @@ while True:
             ingest_to_influx(req)
         except:
             logging.error("Error in injecting. Continuing...")
-
+    else:
+        logging.info("Data did not change... continuing")
     # Move current file to previous for next comparison
     os.rename("tmp-now.txt", "tmp-prev.txt")
 
