@@ -33,6 +33,12 @@
     font-size: 14px;
 }
 
+.left-buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
 .cdk-drag-preview {
     box-sizing: border-box;
     border-radius: 4px;

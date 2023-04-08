@@ -22,6 +22,7 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { MatTreeModule } from '@angular/material/tree'
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip'
+import { MatMenuModule } from '@angular/material/menu'
 
 
 import { ColorPickerModule } from 'ngx-color-picker';
@@ -39,6 +40,7 @@ import { VehiclePositionComponent } from './query-builders/vehicle-position/vehi
 import { LayersComponent } from './layers/layers.component';
 import { WhereClauseDialog } from './query-builders/where-clause-dialog/where-clause-dialog.component';
 import { ClauseTreeComponent } from './query-builders/clause-tree/clause-tree.component';
+import { EditLayerDialogComponent } from './layers/edit-layer-dialog/edit-layer-dialog.component';
 
 @NgModule({
   declarations: [
@@ -47,7 +49,8 @@ import { ClauseTreeComponent } from './query-builders/clause-tree/clause-tree.co
     VehiclePositionComponent,
     LayersComponent,
     ClauseTreeComponent,
-    WhereClauseDialog
+    WhereClauseDialog,
+    EditLayerDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -73,6 +76,7 @@ import { ClauseTreeComponent } from './query-builders/clause-tree/clause-tree.co
     MatTreeModule,
     MatDialogModule,
     MatTooltipModule,
+    MatMenuModule,
     DragDropModule,
     ScrollingModule,
     ColorPickerModule,

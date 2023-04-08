@@ -22,7 +22,7 @@ export class ClauseTreeComponent implements OnInit {
   @Input() attributes: Attributes = {};
   @Input() formName: string;
   @Input() set refresh(value: number) {
-    if(value > 0) this.ngOnInit();
+    if (value > 0) this.ngOnInit();
   }
   @Output() rootNodeDeleted = new EventEmitter<boolean>();
   form: FormControl;

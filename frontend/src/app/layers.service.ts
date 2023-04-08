@@ -15,19 +15,26 @@ import { VehiclePositionPoint } from './query-builders/vehicle-position/vehicle-
   providedIn: 'root'
 })
 export class LayersService {
-  private layers: Map<string, Layer> = new Map<string, Layer>();
+  private layers: Map<string, Layer> = new Map<string, Layer>(); // stores actual layers (referenced by esri-map)
+
+  /* *********************** */
+  /*  Subject/Subscriptions  */
+  /* *********************** */
 
   private addLayer = new Subject<string>();
   public addLayer$ = this.addLayer.asObservable();
   private removeLayer = new Subject<string>();
   public removeLayer$ = this.removeLayer.asObservable();
-  // private toggleVisibility
 
   getLayer(id: string) {
     return this.layers.get(id);
   }
 
-  changeColor(id: string, color: string) {
+  /* *************** */
+  /* Layer Modifiers */
+  /* *************** */
+
+  changeLayerColor(id: string, color: string) {
     var l = this.layers.get(id);
     if (l instanceof FeatureLayer) {
       (((l as FeatureLayer).renderer as
@@ -36,9 +43,17 @@ export class LayersService {
     }
   }
 
-  toggleVisibility(id: string) {
+  toggleLayerVisibility(id: string) {
     this.layers.get(id)!.visible = !this.layers.get(id)?.visible;
   }
+
+  deleteLayer(id: string) {
+    this.removeLayer.next(id);
+  }
+
+  /* *************** */
+  /* Layer Ingesters */
+  /* *************** */
 
   async addVehiclePositionPointLayer(layer: RawDataLayer) {
     // setup layer

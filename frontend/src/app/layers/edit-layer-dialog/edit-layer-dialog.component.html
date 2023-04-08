@@ -1,0 +1,16 @@
+<h1 mat-dialog-title>Layer Info</h1>
+<mat-dialog-content>
+    <form [formGroup]="layerForm" (ngSubmit)="onSubmit()">
+        <mat-form-field class="name-field" appearance="fill">
+            <mat-label>Layer Name</mat-label>
+            <input matInput name="name" formControlName="name">
+        </mat-form-field>
+        <div>Layer Type: {{data.layerType}}</div>
+        <div>Query Type: {{data.type}}</div>
+        
+    </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-button (click)="onSubmit()">Save</button>
+</mat-dialog-actions>

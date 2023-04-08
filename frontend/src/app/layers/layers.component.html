@@ -6,8 +6,8 @@
   <div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
     <div class="example-box" *ngFor="let l of layersByQuery" cdkDrag>
       <div class="example-custom-placeholder" *cdkDragPlaceholder></div>
-      <mat-checkbox></mat-checkbox>
-      <div>
+      <div class="left-buttons">
+        <mat-checkbox></mat-checkbox>
         <button [(colorPicker)]="l.color" [cpCancelButton]="true" [cpOKButton]="true" [cpCloseClickOutside]="true"
           [cpUseRootViewContainer]="true" (colorPickerClose)="changeColor(l)" mat-icon-button>
           <mat-icon [style.color]="l.color">palette</mat-icon>
@@ -18,9 +18,19 @@
         <button mat-icon-button (click)="toggleVisibility(l)">
           <mat-icon>{{l.visible ? 'visibility' : 'visibility_off'}}</mat-icon>
         </button>
-        <button mat-icon-button>
+        <button mat-icon-button [matMenuTriggerFor]="menu">
           <mat-icon>more_vert</mat-icon>
         </button>
+        <mat-menu #menu="matMenu">
+          <button (click)="deleteLayer(l)" mat-menu-item>
+            <mat-icon>delete</mat-icon>
+            <span>Delete</span>
+          </button>
+          <button (click)="editLayer(l)" mat-menu-item>
+            <mat-icon>edit</mat-icon>
+            <span>Edit</span>
+          </button>
+        </mat-menu>
       </div>
     </div>
   </div>

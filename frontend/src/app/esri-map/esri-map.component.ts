@@ -12,7 +12,8 @@ import { Subscription } from 'rxjs';
 })
 export class EsriMapComponent implements OnInit, OnDestroy {
   public view: MapView;
-  private addLayerSub$: Subscription
+  private addLayerSub$: Subscription;
+  private removeLayerSub$: Subscription;
 
   constructor(
     private layersService: LayersService
@@ -45,7 +46,11 @@ export class EsriMapComponent implements OnInit, OnDestroy {
     })
     this.addLayerSub$ = this.layersService.addLayer$
       .subscribe((id: string) => {
-        this.view.map.add(this.layersService.getLayer(id)!);        
+        this.view.map.add(this.layersService.getLayer(id)!);
+      });
+    this.removeLayerSub$ = this.layersService.removeLayer$
+      .subscribe((id: string) => {
+        this.view.map.remove(this.layersService.getLayer(id)!);
       })
   }
 

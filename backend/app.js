@@ -35,9 +35,11 @@ app.get("/api/realtime/vehicle_position", async (req, res, next) => {
             filterExpr = client.buildFilterExpression(JSON.parse(req.query.whereClauses));
         }
         res.status(201).send(await client.queryCurrentVehiclePosition(filterExpr));
+        console.log("Vehicle Position Query: success");
     } catch (error) {
         console.error(error)
         res.status(500).send("An error occurred while fetching the vehicle position proto buffer from the RTD real-time API");
+        console.log("Vehicle Position Query: error");
     }
 });
 

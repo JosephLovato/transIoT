@@ -79,6 +79,7 @@ export class WhereClauseDialog {
                 if(confirm('Switching the type to clause will delete all child clauses. Do you want to switch?')) {
                     this.dialogRef.close({ ...this.clauseForm.value, children: [], id: this.data.node.id, parent: this.data.node.parent})
                 }
+        // confirm with user that change logical operator deletes clause data
         } else if(this.clauseForm.get('nodeType')?.value == NodeType.LogicalOperator &&
         this.data.node.nodeType == NodeType.Clause) {
             if(confirm('Switching the type to logical operator will delete this clause\'s attribute/op/value. Do you want to switch?')) {
