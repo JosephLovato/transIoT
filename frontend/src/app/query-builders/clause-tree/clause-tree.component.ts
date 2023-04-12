@@ -3,9 +3,9 @@ import { NestedTreeControl } from '@angular/cdk/tree';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { MatDialog } from '@angular/material/dialog';
 import { FormControl, FormGroupDirective } from '@angular/forms'
-import { ClauseNode, LogicalOperator } from 'src/app/where-clauses';
+import { ClauseNode, LogicalOperator } from 'src/app/query/where-clauses';
 import { WhereClauseDialog } from '../where-clause-dialog/where-clause-dialog.component';
-import { Attributes } from 'src/app/query';
+import { Attributes } from 'src/app/query/query';
 import { BehaviorSubject, lastValueFrom } from 'rxjs';
 
 export class DialogData {

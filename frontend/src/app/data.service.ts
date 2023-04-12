@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject, catchError, of, tap, throwError } from 'rxjs';
-import { Query, QueryType } from './query';
+import { Query, QueryType } from './query/query';
 import { transit_realtime } from 'gtfs-realtime-bindings';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { VehiclePositionPoint } from './query-builders/vehicle-position/vehicle-positition-query.model';
+import { VehiclePositionPoint } from './query-builders/vehicle-position/vehicle-position-query.model';
 import { RawDataLayer } from './layer-types';
 
 type FeedMessage = transit_realtime.FeedMessage;

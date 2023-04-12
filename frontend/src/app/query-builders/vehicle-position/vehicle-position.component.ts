@@ -3,13 +3,13 @@ import { NestedTreeControl } from '@angular/cdk/tree';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { Dialog, DialogRef } from '@angular/cdk/dialog'
 import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { TemporalType, VehiclePositionQuery, vehiclePositionAttributes } from './vehicle-positition-query.model';
-import { ClauseNode, LogicalOperator, Operator, WhereClause } from '../../where-clauses';
+import { TemporalType, VehiclePositionQuery, vehiclePositionAttributes } from './vehicle-position-query.model';
+import { ClauseNode, LogicalOperator, Operator, WhereClause } from '../../query/where-clauses';
 import { DataService } from 'src/app/data.service';
 import { Observable, catchError, throwError } from 'rxjs';
 import { WhereClauseDialog } from '../where-clause-dialog/where-clause-dialog.component';
 import { dialogflow_v2beta1 } from 'googleapis';
-import { LayerType } from 'src/app/query';
+import { LayerType } from 'src/app/query/query';
 
 @Component({
   selector: 'app-vehicle-position',

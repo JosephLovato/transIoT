@@ -4,7 +4,8 @@
         <div class="node-options">
             <mat-form-field class="logical-op" appearance="outline">
                 <mat-label>Type</mat-label>
-                <mat-select name="nodeType" formControlName="nodeType" [matTooltip]="'This can either be a stand-alone clause or a logical operator applied to children clauses'">
+                <mat-select name="nodeType" formControlName="nodeType"
+                    [matTooltip]="'This can either be a stand-alone clause or a logical operator applied to children clauses'">
                     <mat-option *ngFor="let type of nodeTypes" [value]="type">
                         {{type}}
                     </mat-option>
@@ -12,7 +13,7 @@
             </mat-form-field>
             <mat-form-field class="logical-op" appearance="outline">
                 <mat-label>Logical Operator</mat-label>
-                <mat-select name="attr" formControlName="logicalOperator" >
+                <mat-select name="attr" formControlName="logicalOperator">
                     <mat-option *ngFor="let op of logicalOps" [value]="op">
                         {{op}}
                     </mat-option>
@@ -20,8 +21,8 @@
             </mat-form-field>
         </div>
         <mat-divider></mat-divider>
-        <div class="clause-container" formGroupName="whereClause" >
-            <mat-form-field class="clause-attr clause-member" appearance="fill" >
+        <div class="clause-container" formGroupName="whereClause">
+            <mat-form-field class="clause-attr clause-member" appearance="fill">
                 <mat-label>Attribute</mat-label>
                 <mat-select name="attr" formControlName="attribute">
                     <mat-option *ngFor="let attr of attributesIterable" [value]="attr.name">
@@ -41,7 +42,13 @@
 
             <mat-form-field class="clause-key clause-member" appearance="fill">
                 <mat-label>Value</mat-label>
-                <input matInput name="val" formControlName="value">
+                <input type="text" name="val"  aria-label="Number" matInput formControlName="value"
+                    [matAutocomplete]="auto">
+                <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                    <mat-option *ngFor="let option of currentValueFilteredOptions | async" [value]="option">
+                        {{option}}
+                    </mat-option>
+                </mat-autocomplete>
             </mat-form-field>
 
         </div>

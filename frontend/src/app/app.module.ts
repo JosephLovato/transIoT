@@ -23,6 +23,7 @@ import { MatTreeModule } from '@angular/material/tree'
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip'
 import { MatMenuModule } from '@angular/material/menu'
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 
 import { ColorPickerModule } from 'ngx-color-picker';
@@ -41,6 +42,7 @@ import { LayersComponent } from './layers/layers.component';
 import { WhereClauseDialog } from './query-builders/where-clause-dialog/where-clause-dialog.component';
 import { ClauseTreeComponent } from './query-builders/clause-tree/clause-tree.component';
 import { EditLayerDialogComponent } from './layers/edit-layer-dialog/edit-layer-dialog.component';
+import { BusStopsComponent } from './query-builders/bus-stops/bus-stops.component';
 
 @NgModule({
   declarations: [
@@ -50,7 +52,8 @@ import { EditLayerDialogComponent } from './layers/edit-layer-dialog/edit-layer-
     LayersComponent,
     ClauseTreeComponent,
     WhereClauseDialog,
-    EditLayerDialogComponent
+    EditLayerDialogComponent,
+    BusStopsComponent
   ],
   imports: [
     BrowserModule,
@@ -77,6 +80,7 @@ import { EditLayerDialogComponent } from './layers/edit-layer-dialog/edit-layer-
     MatDialogModule,
     MatTooltipModule,
     MatMenuModule,
+    MatAutocompleteModule,
     DragDropModule,
     ScrollingModule,
     ColorPickerModule,

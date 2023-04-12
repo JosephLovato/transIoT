@@ -4,7 +4,7 @@ import { DataService } from '../data.service';
 import { Subscription, lastValueFrom } from 'rxjs';
 import { RawDataLayer } from '../layer-types';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { LayerType, Query, QueryType } from '../query';
+import { LayerType, Query, QueryType } from '../query/query';
 import { query } from 'express';
 import { MatDialog } from '@angular/material/dialog';
 import { EditLayerDialogComponent } from './edit-layer-dialog/edit-layer-dialog.component';

@@ -9,7 +9,7 @@ import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
 import Graphic from '@arcgis/core/Graphic';
 import GeometryProperties from '@arcgis/core/geometry/Point';
 import Color from "@arcgis/core/Color.js";
-import { VehiclePositionPoint } from './query-builders/vehicle-position/vehicle-positition-query.model';
+import { VehiclePositionPoint } from './query-builders/vehicle-position/vehicle-position-query.model';
 
 @Injectable({
   providedIn: 'root'
