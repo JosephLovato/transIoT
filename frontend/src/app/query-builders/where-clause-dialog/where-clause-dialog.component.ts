@@ -30,24 +30,9 @@ export class WhereClauseDialog {
         private fb: FormBuilder) { }
 
     ngOnInit(): void {
-        this.initializeForm(this.data.node);
         this.attributes = this.data.attributes;
         this.attributesIterable = Object.values(this.attributes);
-        // this.previousNode = { ...this.data.node, whereClause: this.data.node.whereClause};
-
-        // change drop down list when attribute changes
-        this.clauseForm.get('whereClause')!.get('attribute')!.valueChanges.subscribe(value => {
-            this.clauseForm.get('whereClause')!.get('value')!.setValue('');
-            // add value selection options if type is a string
-            if (this.attributes[value].type == 'string') {
-                this.currentValueOptions = Object.keys(this.attributes[value].possibleValues as { [key: string]: string });
-            }
-            // inject filter to drop down list
-            this.currentValueFilteredOptions = this.clauseForm.get('whereClause')!.get('value')!.valueChanges.pipe(
-                startWith(''),
-                map(value => this._filter(value || ''))
-            )
-        })
+        this.initializeForm(this.data.node);
     }
 
     // filter for value options selection
@@ -90,7 +75,28 @@ export class WhereClauseDialog {
             .pipe(startWith(this.clauseForm.get('whereClause')?.get('attribute')?.getRawValue()))
             .subscribe(value => {
                 // this.clauseForm.get('whereClause')?.get('value')?.ty
-            })
+            });
+
+         // change drop down list when attribute changes
+         this.clauseForm.get('whereClause')!.get('attribute')!.valueChanges
+            .pipe(startWith(this.clauseForm.get('whereClause')!.get('attribute')!.value))
+            .subscribe(attr => {
+            // don't do anything if the attribute is not set
+            if(!attr) {
+                return;
+            }
+            console.log('>>', attr);
+            console.log(this.attributes);
+            // add value selection options if type is a string
+            if (this.attributes[attr].type == 'string') {
+                this.currentValueOptions = Object.keys(this.attributes[attr].possibleValues as { [key: string]: string });
+            }
+            // inject filter to drop down list
+            this.currentValueFilteredOptions = this.clauseForm.get('whereClause')!.get('value')!.valueChanges.pipe(
+                startWith(''),
+                map(value => this._filter(value || ''))
+            )
+        });
     }
 
     onSubmit() {
@@ -100,13 +106,14 @@ export class WhereClauseDialog {
             if (confirm('Switching the type to clause will delete all child clauses. Do you want to switch?')) {
                 this.dialogRef.close({ ...this.clauseForm.value, children: [], id: this.data.node.id, parent: this.data.node.parent })
             }
-            // confirm with user that change logical operator deletes clause data
+        // confirm with user that change to logical operator deletes clause data
         } else if (this.clauseForm.get('nodeType')?.value == NodeType.LogicalOperator &&
             this.data.node.nodeType == NodeType.Clause) {
             if (confirm('Switching the type to logical operator will delete this clause\'s attribute/op/value. Do you want to switch?')) {
                 this.dialogRef.close({ ...this.clauseForm.value, children: this.data.node.children, id: this.data.node.id, parent: this.data.node.parent })
             }
         } else {
+        // user did not change node type
             this.dialogRef.close({ ...this.clauseForm.value, children: this.data.node.children, id: this.data.node.id, parent: this.data.node.parent });
         }
 

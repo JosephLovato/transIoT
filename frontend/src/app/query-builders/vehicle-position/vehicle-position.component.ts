@@ -22,7 +22,7 @@ export class VehiclePositionComponent implements OnInit {
   whereClausesPresent = false;
   refresh: number = 0;
   queryForm!: FormGroup;
-  attributes = vehiclePositionAttributes;
+  attributes = VehiclePositionQuery._attributes;
   temporalTypes = Object.values(TemporalType);
 
   constructor(
