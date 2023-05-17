@@ -1,6 +1,6 @@
 import { Query } from "./query/query";
 
-export abstract class RawDataLayer {
+export class RawDataLayer {
     query: Query;
-    abstract data: any;
+    data: any;
 }

@@ -94,7 +94,6 @@ export class ClauseTreeComponent implements OnInit {
   }
 
   deleteNode(node: ClauseNode) {
-    console.log(node === this.rootNode)
     if (node == this.rootNode) {
       if (this.hasChild(0, node)) {
         if (confirm("Deleting this logical operator will delete all children clauses and operators. Are you sure you want to delete?")) {

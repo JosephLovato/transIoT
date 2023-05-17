@@ -36,12 +36,32 @@ export class ClauseNode {
         this.id = id;
     }
 
+    /**
+     * Converts the where clause tree to a JSON object
+     * @returns JSON object
+     */
     toJson(): any {
         if(this.nodeType == NodeType.LogicalOperator) {
             return { logicalOperator: this.logicalOperator,
                      children: this.children.map(node => node.toJson())}
         } else {
             return this.whereClause;
+        }
+    }
+
+    /**
+     * Converts the where clause tree to an SQL string
+     * @returns string
+     */
+    toSQLString(): string {
+        if(this.nodeType == NodeType.LogicalOperator) {
+            return this.children.flatMap((value, index, array) => {
+                array.length - 1 !== index ?
+                [value, this.logicalOperator] :
+                [value]
+            }).join(" ");
+        } else {
+            return `${this.whereClause.attribute} ${this.whereClause.operator} ${this.whereClause.value}`;
         }
     }
 }

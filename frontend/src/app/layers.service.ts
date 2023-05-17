@@ -5,11 +5,17 @@ import { RawDataLayer } from './layer-types';
 import Layer from '@arcgis/core/layers/Layer';
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import SimpleRenderer from '@arcgis/core/renderers/SimpleRenderer'
+import SizeVariable from '@arcgis/core/renderers/visualVariables/SizeVariable'
 import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
+import CIMSymbol from '@arcgis/core/symbols/CIMSymbol'
+import { applyCIMSymbolColor } from '@arcgis/core/symbols/support/cimSymbolUtils'
+import WebStyleSymbol from '@arcgis/core/symbols/WebStyleSymbol'
 import Graphic from '@arcgis/core/Graphic';
 import GeometryProperties from '@arcgis/core/geometry/Point';
 import Color from "@arcgis/core/Color.js";
 import { VehiclePositionPoint } from './query-builders/vehicle-position/vehicle-position-query.model';
+import { ArcGISFeatureQuery } from './query/arcgis-query';
+import { LayerType, Query, QueryType } from './query/query';
 
 @Injectable({
   providedIn: 'root'
@@ -17,14 +23,24 @@ import { VehiclePositionPoint } from './query-builders/vehicle-position/vehicle-
 export class LayersService {
   private layers: Map<string, Layer> = new Map<string, Layer>(); // stores actual layers (referenced by esri-map)
 
+  colors = [
+    "#ff0000",
+    "#00ff00",
+    "#0000ff"
+  ]
+  colors_sequence = 0;
+
   /* *********************** */
   /*  Subject/Subscriptions  */
   /* *********************** */
 
-  private addLayer = new Subject<string>();
-  public addLayer$ = this.addLayer.asObservable();
-  private removeLayer = new Subject<string>();
-  public removeLayer$ = this.removeLayer.asObservable();
+  private addLayerToMap = new Subject<string>();
+  public addLayerToMap$ = this.addLayerToMap.asObservable();
+  private removeLayerFromMap = new Subject<string>();
+  public removeLayerFromMap$ = this.removeLayerFromMap.asObservable();
+
+  private addLayerToLayersView = new Subject<Query>();
+  public addLayerToLayersView$ = this.addLayerToLayersView.asObservable();
 
   getLayer(id: string) {
     return this.layers.get(id);
@@ -34,12 +50,23 @@ export class LayersService {
   /* Layer Modifiers */
   /* *************** */
 
+  setInitialColor(query: Query) {
+    query.color = this.colors[this.colors_sequence];
+    this.colors_sequence = (this.colors_sequence + 1) % this.colors.length;
+  }
+
   changeLayerColor(id: string, color: string) {
     var l = this.layers.get(id);
     if (l instanceof FeatureLayer) {
-      (((l as FeatureLayer).renderer as
-        SimpleRenderer).symbol as
-        SimpleMarkerSymbol).color = new Color(color);
+      const symbol = ((l as FeatureLayer).renderer as
+        SimpleRenderer).symbol;
+      if (symbol.type == "simple-marker") {
+        (symbol as SimpleMarkerSymbol).color = new Color(color);
+      } else if (symbol.type == "cim") {
+        const cimSymbol = symbol as CIMSymbol;
+        applyCIMSymbolColor(cimSymbol, new Color(color));
+        cimSymbol.color = new Color(color); // not sure why but we need this too
+      }
     }
   }
 
@@ -48,14 +75,15 @@ export class LayersService {
   }
 
   deleteLayer(id: string) {
-    this.removeLayer.next(id);
+    this.removeLayerFromMap.next(id);
   }
 
-  /* *************** */
-  /* Layer Ingesters */
-  /* *************** */
+  /* *************************** */
+  /* Data ServiceLayer Ingesters */
+  /* *************************** */
 
   async addVehiclePositionPointLayer(layer: RawDataLayer) {
+    this.setInitialColor(layer.query);
     // setup layer
     // TODO do this in a separate function
     const newLayer = new FeatureLayer({
@@ -204,7 +232,58 @@ export class LayersService {
     await newLayer.applyEdits({ addFeatures: graphics });
     // save layer and tell map component to add the layer
     this.layers.set(newLayer.id, newLayer);
-    this.addLayer.next(newLayer.id);
+    this.addLayerToMap.next(newLayer.id);
   }
 
+  /* ********************** */
+  /* Static Layer Ingesters */
+  /* ********************** */
+
+  async addArcGISFeatureLayer(query: ArcGISFeatureQuery) {
+    // create copy of static layer from query
+    var newLayer: FeatureLayer = query.getFeatureLayer().clone();
+
+    // set some properties
+    this.setInitialColor(query);
+    newLayer.id = query.time.getTime().toString();
+
+    if (query.layerType = LayerType.Point) {
+      var renderer: SimpleRenderer = new SimpleRenderer;
+      const symbol = new WebStyleSymbol({
+        name: query.getWebStyleSymbolName(),
+        styleName: "Esri2DPointSymbolsStyle",
+      });
+
+      const cimSymbol = await symbol.fetchCIMSymbol();
+      applyCIMSymbolColor(cimSymbol, new Color(query.color));
+      renderer.symbol = cimSymbol;
+
+      // TODO: figure out visual variables to scale symbols correctly
+      // renderer.visualVariables = [
+      //   {
+      // type: "size",
+      //     valueExpression: "$view.scale",
+      // stops: [
+      //   { size: 9, value: 1155581 },
+      //   { size: 6, value: 9244648 },
+      //   { size: 3, value: 73957190 },
+      //   { size: 1.5, value: 591657527 }
+      // ]
+      // }] as SizeVariable[];
+      newLayer.renderer = renderer;
+    };
+
+    // TODO: build where clause definition expression as a string
+    // var defExpr = layer.whereClauses
+    // newLayer.def
+
+    // save layer here
+    this.layers.set(newLayer.id, newLayer);
+
+    // send query to layers component to display
+    this.addLayerToLayersView.next(query);
+
+    // tell map component to display layer on map
+    this.addLayerToMap.next(newLayer.id);
+  }
 }

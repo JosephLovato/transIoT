@@ -8,6 +8,7 @@ import { LayerType, Query, QueryType } from '../query/query';
 import { query } from 'express';
 import { MatDialog } from '@angular/material/dialog';
 import { EditLayerDialogComponent } from './edit-layer-dialog/edit-layer-dialog.component';
+import { ArcGISFeatureQuery } from '../query/arcgis-query';
 
 @Component({
   selector: 'app-layers',
@@ -15,7 +16,8 @@ import { EditLayerDialogComponent } from './edit-layer-dialog/edit-layer-dialog.
   styleUrls: ['./layers.component.css']
 })
 export class LayersComponent {
-  private newLayerSub: Subscription;
+  private newRawDataLayerSub: Subscription;
+  private newLayerServiceLayerSub: Subscription;
   public layersByQuery: Query[] = [];
 
   colors = [
@@ -31,33 +33,43 @@ export class LayersComponent {
     private dialog: MatDialog) { }
 
   ngOnDestroy(): void {
-    this.newLayerSub.unsubscribe();
+    this.newRawDataLayerSub.unsubscribe();
   }
 
   ngOnInit(): void {
-    this.newLayerSub = this.dataService.newLayers$
+    // subscribe to raw data layers sent from the data service
+    this.newRawDataLayerSub = this.dataService.newLayers$
       .subscribe((layer: RawDataLayer) => {
-        // set color
-        layer.query.color = this.colors[this.colors_sequence]
-        this.colors_sequence = (this.colors_sequence + 1) % this.colors.length;
-        // send to appropriate layers service function to be saved and rendered as an esri layer
-        switch (layer.query.layerType) {
-          case LayerType.Point:
-            switch (layer.query.type) {
-              case QueryType.VehiclePosition:
-                this.layersService.addVehiclePositionPointLayer(layer);
-            }
-            break;
-          case LayerType.Line:
-            break;
-          default:
-            throw (`Layer type not support by layers service: ${layer.query.layerType}`)
-        }
-
-        // save here to be displayed
-        this.layersByQuery.push(layer.query);
+         // set color
+         layer.query.color = this.colors[this.colors_sequence]
+         this.colors_sequence = (this.colors_sequence + 1) % this.colors.length;
+         // send to appropriate layers service function to be saved and rendered as an esri layer
+         switch (layer.query.layerType) {
+           case LayerType.Point:
+             switch (layer.query.type) {
+               case QueryType.VehiclePosition:
+                 this.layersService.addVehiclePositionPointLayer(layer);
+             }
+             break;
+           case LayerType.Line:
+             break;
+           default:
+             throw (`Layer type not support by layers service: ${layer.query.layerType}`)
+         }
+ 
+         // save here to be displayed
+         this.layersByQuery.push(layer.query);
       })
-    this.dataService.newLayers$.subscribe()
+    this.dataService.newLayers$.subscribe(); // TODO: is this needed?
+
+    // subscribe to queries sent from the layers service (static layers)
+    this.newLayerServiceLayerSub = this.layersService.addLayerToLayersView$
+      .subscribe((layer: Query) => {
+        layer.color = this.colors[this.colors_sequence]
+        this.colors_sequence = (this.colors_sequence + 1) % this.colors.length;
+        this.layersByQuery.push(layer);
+    });
+
   }
 
   drop(event: CdkDragDrop<string[]>) {

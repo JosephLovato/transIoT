@@ -77,16 +77,14 @@ export class WhereClauseDialog {
                 // this.clauseForm.get('whereClause')?.get('value')?.ty
             });
 
-         // change drop down list when attribute changes
-         this.clauseForm.get('whereClause')!.get('attribute')!.valueChanges
+        // change drop down list when attribute changes
+        this.clauseForm.get('whereClause')!.get('attribute')!.valueChanges
             .pipe(startWith(this.clauseForm.get('whereClause')!.get('attribute')!.value))
             .subscribe(attr => {
             // don't do anything if the attribute is not set
             if(!attr) {
                 return;
             }
-            console.log('>>', attr);
-            console.log(this.attributes);
             // add value selection options if type is a string
             if (this.attributes[attr].type == 'string') {
                 this.currentValueOptions = Object.keys(this.attributes[attr].possibleValues as { [key: string]: string });

@@ -7,6 +7,7 @@ export abstract class ArcGISFeatureQuery extends Query {
     public static featureLayer: FeatureLayer;
     // this allows us to access the overridden static member of derived classes
     public override derivedClass = (this.constructor as typeof ArcGISFeatureQuery);
+    protected webStyleSymbolName: string = "circle-1";
 
     override async populateAttributes() {
         let attrs: Attributes = {};
@@ -39,5 +40,21 @@ export abstract class ArcGISFeatureQuery extends Query {
     }
 
     public get url(): string { return this._url };
+
+    /**
+     * Accessor for the base ArcGIS feature layer of this query
+     * @returns FeatureLayer
+     */
+    public getFeatureLayer() {
+        return this.derivedClass.featureLayer;
+    }
+
+    /**
+     * Accessor for the WebStyleSymbol name
+     * @returns string
+     */
+    public getWebStyleSymbolName() {
+        return this.webStyleSymbolName;
+    }
 
 }

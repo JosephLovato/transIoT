@@ -44,11 +44,11 @@ export class EsriMapComponent implements OnInit, OnDestroy {
     this.initializeMap().then(() => {
       console.log("[Esri-Map-Component] Initialized Map");
     })
-    this.addLayerSub$ = this.layersService.addLayer$
+    this.addLayerSub$ = this.layersService.addLayerToMap$
       .subscribe((id: string) => {
         this.view.map.add(this.layersService.getLayer(id)!);
       });
-    this.removeLayerSub$ = this.layersService.removeLayer$
+    this.removeLayerSub$ = this.layersService.removeLayerFromMap$
       .subscribe((id: string) => {
         this.view.map.remove(this.layersService.getLayer(id)!);
       })
