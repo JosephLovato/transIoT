@@ -23,7 +23,8 @@ export abstract class Query {
 
 export enum QueryType {
     VehiclePosition = "Vehicle Position",
-    BusStops = "Bus Stops"
+    BusStops = "Bus Stops",
+    BusRoutes = "Bus Routes"
 }
 
 export enum LayerType {

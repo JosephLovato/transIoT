@@ -43,6 +43,7 @@ import { WhereClauseDialog } from './query-builders/where-clause-dialog/where-cl
 import { ClauseTreeComponent } from './query-builders/clause-tree/clause-tree.component';
 import { EditLayerDialogComponent } from './layers/edit-layer-dialog/edit-layer-dialog.component';
 import { BusStopsComponent } from './query-builders/bus-stops/bus-stops.component';
+import { BusRoutesComponent } from './query-builders/bus-routes/bus-routes.component';
 
 @NgModule({
   declarations: [
@@ -53,7 +54,8 @@ import { BusStopsComponent } from './query-builders/bus-stops/bus-stops.componen
     ClauseTreeComponent,
     WhereClauseDialog,
     EditLayerDialogComponent,
-    BusStopsComponent
+    BusStopsComponent,
+    BusRoutesComponent
   ],
   imports: [
     BrowserModule,

@@ -7,6 +7,7 @@ import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import SimpleRenderer from '@arcgis/core/renderers/SimpleRenderer'
 import SizeVariable from '@arcgis/core/renderers/visualVariables/SizeVariable'
 import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
+import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol'
 import CIMSymbol from '@arcgis/core/symbols/CIMSymbol'
 import { applyCIMSymbolColor } from '@arcgis/core/symbols/support/cimSymbolUtils'
 import WebStyleSymbol from '@arcgis/core/symbols/WebStyleSymbol'
@@ -63,12 +64,18 @@ export class LayersService {
     if (l instanceof FeatureLayer) {
       const symbol = ((l as FeatureLayer).renderer as
         SimpleRenderer).symbol;
-      if (symbol.type == "simple-marker") {
-        (symbol as SimpleMarkerSymbol).color = new Color(color);
-      } else if (symbol.type == "cim") {
-        const cimSymbol = symbol as CIMSymbol;
-        applyCIMSymbolColor(cimSymbol, new Color(color));
-        cimSymbol.color = new Color(color); // not sure why but we need this too
+      switch (symbol.type) {
+        case 'simple-marker':
+        case 'simple-line':
+          (symbol as SimpleMarkerSymbol).color = new Color(color);
+          break;
+        case 'cim':
+          const cimSymbol = symbol as CIMSymbol;
+          applyCIMSymbolColor(cimSymbol, new Color(color));
+          cimSymbol.color = new Color(color); // not sure why but we need this too
+          break;
+        case 'simple-line':
+
       }
     }
   }
@@ -250,7 +257,7 @@ export class LayersService {
     this.setInitialColor(query);
     newLayer.id = query.time.getTime().toString();
 
-    if (query.layerType = LayerType.Point) {
+    if (query.layerType == LayerType.Point) {
       var renderer: SimpleRenderer = new SimpleRenderer;
       const symbol = new WebStyleSymbol({
         name: query.getWebStyleSymbolName(),
@@ -274,12 +281,17 @@ export class LayersService {
       // ]
       // }] as SizeVariable[];
       newLayer.renderer = renderer;
-    };
+    } else if (query.layerType == LayerType.Line) {
+      newLayer.renderer = new SimpleRenderer({
+        symbol: new SimpleLineSymbol({
+          color: query.color
+        })
+      });
+    }
 
     // build where clause definition expression as a string
     var defExpr = query.whereClauses == undefined ? '' : query.whereClauses!.toSQLString();
     newLayer.definitionExpression = defExpr;
-    console.log(defExpr);
 
     // save layer here
     this.layers.set(newLayer.id, newLayer);

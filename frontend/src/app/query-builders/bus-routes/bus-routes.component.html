@@ -1,0 +1,13 @@
+<div class="container">
+    <form [formGroup]="queryForm" (ngSubmit)="onSubmit()">
+        <h3>WHERE</h3>
+        <div *ngIf="!whereClausesPresent">
+            <button mat-raised-button type="button" color="primary" class="add-clause-button" (click)="onAddClauses()">Add clauses</button>
+        </div>
+        <app-clause-tree [attributes]="attributes" [refresh]="refresh" (rootNodeDeleted)="rootNodeDeleted()" formName="whereClauses" [hidden]="!whereClausesPresent"></app-clause-tree>
+        <mat-divider></mat-divider>
+        <div class="submit-button">
+            <button mat-raised-button color="accent" type="submit" [disabled]="!queryForm.valid">Submit</button>
+        </div>
+    </form>
+</div>
