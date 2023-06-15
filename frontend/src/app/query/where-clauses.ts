@@ -1,7 +1,8 @@
 export interface WhereClause {
     attribute: string,
     operator: Operator,
-    value: string
+    value: string,
+    valueType?: string
 }
 
 export enum Operator {
@@ -41,9 +42,11 @@ export class ClauseNode {
      * @returns JSON object
      */
     toJson(): any {
-        if(this.nodeType == NodeType.LogicalOperator) {
-            return { logicalOperator: this.logicalOperator,
-                     children: this.children.map(node => node.toJson())}
+        if (this.nodeType == NodeType.LogicalOperator) {
+            return {
+                logicalOperator: this.logicalOperator,
+                children: this.children.map(node => node.toJson())
+            }
         } else {
             return this.whereClause;
         }
@@ -54,14 +57,28 @@ export class ClauseNode {
      * @returns string
      */
     toSQLString(): string {
-        if(this.nodeType == NodeType.LogicalOperator) {
-            return this.children.flatMap((value, index, array) => {
-                array.length - 1 !== index ?
-                [value, this.logicalOperator] :
-                [value]
-            }).join(" ");
+        // recursive case
+        if (this.nodeType == NodeType.LogicalOperator) {
+            // special case for NOT operator
+            if (this.logicalOperator == LogicalOperator.Not) {
+                // temporally change top 'not' to 'or'
+                this.logicalOperator = LogicalOperator.Or
+                const ret = `not ${this.toSQLString()}`;
+                // change back to 'not'
+                this.logicalOperator = LogicalOperator.Not;
+                return ret;
+            } else {
+                const expr = this.children.flatMap((value, index, array) => {
+                    return array.length - 1 !== index ?
+                        [value.toSQLString(), this.logicalOperator] :
+                        [value.toSQLString()]
+                }).join(' ');
+                return `(${expr})`
+            }
         } else {
-            return `${this.whereClause.attribute} ${this.whereClause.operator} ${this.whereClause.value}`;
+            // base case
+            const value = this.whereClause.valueType == 'string' ? `'${this.whereClause.value}'` : this.whereClause.value;
+            return `${this.whereClause.attribute} ${OperatorToSql[this.whereClause.operator]} ${value}`;
         }
     }
 }
@@ -77,4 +94,15 @@ export enum LogicalOperator {
     Or = 'or',
     Not = 'not',
     None = ''
+}
+
+const OperatorToSql: { [key: string]: string } = {
+    '': '',
+    '==': '=',
+    '!=': '<>',
+    '>': '>',
+    '<': '<',
+    '>=': '>=',
+    '<=': '<=',
+    'LIKE': 'LIKE'
 }

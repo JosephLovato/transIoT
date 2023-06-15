@@ -20,13 +20,6 @@ export class LayersComponent {
   private newLayerServiceLayerSub: Subscription;
   public layersByQuery: Query[] = [];
 
-  colors = [
-    "#ff0000",
-    "#00ff00",
-    "#0000ff"
-  ]
-  colors_sequence = 0;
-
   constructor(
     private dataService: DataService,
     private layersService: LayersService,
@@ -40,35 +33,30 @@ export class LayersComponent {
     // subscribe to raw data layers sent from the data service
     this.newRawDataLayerSub = this.dataService.newLayers$
       .subscribe((layer: RawDataLayer) => {
-         // set color
-         layer.query.color = this.colors[this.colors_sequence]
-         this.colors_sequence = (this.colors_sequence + 1) % this.colors.length;
-         // send to appropriate layers service function to be saved and rendered as an esri layer
-         switch (layer.query.layerType) {
-           case LayerType.Point:
-             switch (layer.query.type) {
-               case QueryType.VehiclePosition:
-                 this.layersService.addVehiclePositionPointLayer(layer);
-             }
-             break;
-           case LayerType.Line:
-             break;
-           default:
-             throw (`Layer type not support by layers service: ${layer.query.layerType}`)
-         }
- 
-         // save here to be displayed
-         this.layersByQuery.push(layer.query);
+        // send to appropriate layers service function to be saved and rendered as an esri layer
+        switch (layer.query.layerType) {
+          case LayerType.Point:
+            switch (layer.query.type) {
+              case QueryType.VehiclePosition:
+                this.layersService.addVehiclePositionPointLayer(layer);
+            }
+            break;
+          case LayerType.Line:
+            break;
+          default:
+            throw (`Layer type not support by layers service: ${layer.query.layerType}`)
+        }
+
+        // save here to be displayed
+        this.layersByQuery.push(layer.query);
       })
     this.dataService.newLayers$.subscribe(); // TODO: is this needed?
 
     // subscribe to queries sent from the layers service (static layers)
     this.newLayerServiceLayerSub = this.layersService.addLayerToLayersView$
       .subscribe((layer: Query) => {
-        layer.color = this.colors[this.colors_sequence]
-        this.colors_sequence = (this.colors_sequence + 1) % this.colors.length;
         this.layersByQuery.push(layer);
-    });
+      });
 
   }
 

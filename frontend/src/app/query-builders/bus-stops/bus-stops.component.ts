@@ -59,7 +59,7 @@ export class BusStopsComponent implements OnInit {
     }
     console.info("[Bus-Stops-Component] Submitting query: ", query)
 
-    //TODO: call layers service to execute query
+    // call layers service to execute query
     this.layersService.addArcGISFeatureLayer(query);
 
   }

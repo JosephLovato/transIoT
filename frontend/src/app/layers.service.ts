@@ -273,9 +273,10 @@ export class LayersService {
       newLayer.renderer = renderer;
     };
 
-    // TODO: build where clause definition expression as a string
-    // var defExpr = layer.whereClauses
-    // newLayer.def
+    // build where clause definition expression as a string
+    var defExpr = query.whereClauses == undefined ? '' : query.whereClauses!.toSQLString();
+    newLayer.definitionExpression = defExpr;
+    console.log(defExpr);
 
     // save layer here
     this.layers.set(newLayer.id, newLayer);

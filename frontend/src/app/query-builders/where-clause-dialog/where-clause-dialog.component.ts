@@ -21,7 +21,6 @@ export class WhereClauseDialog {
     attributesIterable: Attribute[];
     currentValueOptions: string[] = [];
     currentValueFilteredOptions: Observable<string[]>;
-
     nodeType: NodeType = NodeType.Clause;
 
     constructor(
@@ -81,20 +80,20 @@ export class WhereClauseDialog {
         this.clauseForm.get('whereClause')!.get('attribute')!.valueChanges
             .pipe(startWith(this.clauseForm.get('whereClause')!.get('attribute')!.value))
             .subscribe(attr => {
-            // don't do anything if the attribute is not set
-            if(!attr) {
-                return;
-            }
-            // add value selection options if type is a string
-            if (this.attributes[attr].type == 'string') {
-                this.currentValueOptions = Object.keys(this.attributes[attr].possibleValues as { [key: string]: string });
-            }
-            // inject filter to drop down list
-            this.currentValueFilteredOptions = this.clauseForm.get('whereClause')!.get('value')!.valueChanges.pipe(
-                startWith(''),
-                map(value => this._filter(value || ''))
-            )
-        });
+                // don't do anything if the attribute is not set
+                if (!attr) {
+                    return;
+                }
+                // add value selection options if type is a string
+                if (this.attributes[attr].type == 'string') {
+                    this.currentValueOptions = Object.keys(this.attributes[attr].possibleValues as { [key: string]: string });
+                }
+                // inject filter to drop down list
+                this.currentValueFilteredOptions = this.clauseForm.get('whereClause')!.get('value')!.valueChanges.pipe(
+                    startWith(''),
+                    map(value => this._filter(value || ''))
+                )
+            });
     }
 
     onSubmit() {
@@ -104,15 +103,17 @@ export class WhereClauseDialog {
             if (confirm('Switching the type to clause will delete all child clauses. Do you want to switch?')) {
                 this.dialogRef.close({ ...this.clauseForm.value, children: [], id: this.data.node.id, parent: this.data.node.parent })
             }
-        // confirm with user that change to logical operator deletes clause data
+            // confirm with user that change to logical operator deletes clause data
         } else if (this.clauseForm.get('nodeType')?.value == NodeType.LogicalOperator &&
             this.data.node.nodeType == NodeType.Clause) {
             if (confirm('Switching the type to logical operator will delete this clause\'s attribute/op/value. Do you want to switch?')) {
                 this.dialogRef.close({ ...this.clauseForm.value, children: this.data.node.children, id: this.data.node.id, parent: this.data.node.parent })
             }
         } else {
-        // user did not change node type
-            this.dialogRef.close({ ...this.clauseForm.value, children: this.data.node.children, id: this.data.node.id, parent: this.data.node.parent });
+            // user did not change node type
+            var clause: WhereClause = { ...this.clauseForm.value.whereClause };
+            clause.valueType = this.attributes[clause.attribute].type; // << ^^ quick hack to get attribute type
+            this.dialogRef.close({ ...this.clauseForm.value, children: this.data.node.children, id: this.data.node.id, parent: this.data.node.parent, whereClause: clause });
         }
 
     }
