@@ -26,7 +26,10 @@ export class LayersService {
   colors = [
     "#ff0000",
     "#00ff00",
-    "#0000ff"
+    "#0000ff",
+    "#ff00ff",
+    "#dada18",
+    "#00ffff"
   ]
   colors_sequence = 0;
 
