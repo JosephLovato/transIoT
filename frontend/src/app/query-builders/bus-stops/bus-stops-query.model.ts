@@ -10,7 +10,8 @@ export class BusStopsQuery extends ArcGISFeatureQuery {
         this.name = `Bus Stops Query (${sequence})`;
         this._type = QueryType.BusStops;
         this.layerType = LayerType.Point;
-        this.webStyleSymbolName = "bus-station"
+        this.webStyleSymbolName = "bus-station";
+        this.popupTemplateTitleField = 'STOPNAME';
     }
 
     view(): string {

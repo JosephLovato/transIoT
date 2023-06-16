@@ -180,12 +180,13 @@ export class LayersService {
           }
         })
       }),
-      popupTemplate: {
-        title: "ID: {vehicle_id}",
-        // content: popup_content_rt
-      },
       source: []
     });
+
+    // set popup template
+    newLayer.popupTemplate = newLayer.createPopupTemplate();
+    newLayer.popupTemplate.title = `{vehicle_id}`;
+    newLayer.popupTemplate.fieldInfos.find((f) => f.fieldName == 'time')?.set('format', { dateFormat: 'short-date-long-time-24' });
 
     // populate layer with data
     let data = layer.data.data as VehiclePositionPoint[];
@@ -287,6 +288,13 @@ export class LayersService {
           color: query.color
         })
       });
+    }
+
+    // add automatically generated popup template
+    await newLayer.load();
+    newLayer.popupTemplate = newLayer.createPopupTemplate();
+    if (query.getPopupTemplateTitleField() != undefined) {
+      newLayer.popupTemplate.title = `{${query.getPopupTemplateTitleField()!}}`;
     }
 
     // build where clause definition expression as a string

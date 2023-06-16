@@ -10,6 +10,7 @@ export class BusRoutesQuery extends ArcGISFeatureQuery {
         this.name = `Bus Routes Query (${sequence})`;
         this._type = QueryType.BusRoutes;
         this.layerType = LayerType.Line;
+        this.popupTemplateTitleField = 'NAME';
     }
 
     view(): string {

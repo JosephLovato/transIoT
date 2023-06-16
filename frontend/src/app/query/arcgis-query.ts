@@ -8,6 +8,7 @@ export abstract class ArcGISFeatureQuery extends Query {
     // this allows us to access the overridden static member of derived classes
     public override derivedClass = (this.constructor as typeof ArcGISFeatureQuery);
     protected webStyleSymbolName: string = "circle-1";
+    protected popupTemplateTitleField: string | undefined = undefined;
 
     override async populateAttributes() {
         let attrs: Attributes = {};
@@ -55,6 +56,14 @@ export abstract class ArcGISFeatureQuery extends Query {
      */
     public getWebStyleSymbolName() {
         return this.webStyleSymbolName;
+    }
+
+    /**
+     * Accessor for the field to display as the Popup Template title
+     * @returns string
+     */
+    public getPopupTemplateTitleField() {
+        return this.popupTemplateTitleField;
     }
 
 }
