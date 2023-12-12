@@ -7,6 +7,7 @@
         </mat-form-field>
         <div>Layer Type: {{data.layerType}}</div>
         <div>Query Type: {{data.type}}</div>
+        <div>Where Clause: {{data.whereClauses?.toSQLString()}}</div>
         
     </form>
 </mat-dialog-content>

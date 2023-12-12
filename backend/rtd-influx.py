@@ -13,12 +13,11 @@ __status__ = "Development"
 #################
 
 # general
-from datetime import datetime
 import os
 import filecmp
 import time
-import sys
 import logging
+from dotenv import load_dotenv
 # influx
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
@@ -31,7 +30,7 @@ sample_rate = 40
 ingest_count = 0
 
 # Setup Influx API
-# NOTE: Change these when deploying on AWS (or better yet, learn docker)
+load_dotenv()
 token = os.getenv("INFLUX_TOKEN")
 org = "rtd-local"
 bucket = "RTD-GTFS-NEW"
@@ -81,7 +80,7 @@ def ingest_to_influx(req):
 
 while True:
     # Retrieve protobuf file via RTD's restful API
-    req = Request('https://www.rtd-denver.com/files/gtfs-rt/VehiclePosition.pb',
+    req = Request('https://rtd.prod.acquia-sites.com/files/gtfs-rt/VehiclePosition.pb',
                   headers={'User-Agent': 'Mozilla/5.0'})
     with urlopen(req) as response:
         body = response.read()

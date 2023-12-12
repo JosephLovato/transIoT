@@ -40,7 +40,7 @@ export class VehiclePositionComponent implements OnInit {
 
   initializeForm() {
     this.queryForm = this.fb.group({
-      temporalType: TemporalType.Now,
+      temporalType: TemporalType.Current,
       pastTime: new FormControl<Date | null>(null),
       timeInterval: this.fb.group({
         start: new FormControl<Date | null>(null),
@@ -68,7 +68,7 @@ export class VehiclePositionComponent implements OnInit {
     console.info("[Vehicle-Position-Component] Submitting query: ", query)
 
     // call data service to fetch query
-    this.dataService.getData(query)
+    this.dataService.fetchVehiclePositionData(query)
       // catch any errors from the result of the query
       .pipe(catchError(err => {
         console.log("ERROR");
@@ -76,8 +76,6 @@ export class VehiclePositionComponent implements OnInit {
         return new Observable();
       })).subscribe(result => {
         // if no errors, reinitialize and tell clause tree to refresh
-        console.log("HERE", result);
-        // reset component
         this.ngOnInit();
         this.refresh++;
       });

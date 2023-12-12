@@ -51,7 +51,7 @@ export class VehiclePositionQuery extends InfluxQuery {
 }
 
 export enum TemporalType {
-    Now = "now",
+    Current = "current",
     Past = "past",
     Interval = "interval"
 }
@@ -70,5 +70,12 @@ export interface VehiclePositionPoint {
     bearing: number;
     stop_id: string;
     current_status: string;
+}
+
+export interface VehiclePositionPointOnLine {
+    time: string;
+    latitude: number;
+    longitude: number;
+    route_id: string
 }
 

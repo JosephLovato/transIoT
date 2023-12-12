@@ -12,9 +12,10 @@ import CIMSymbol from '@arcgis/core/symbols/CIMSymbol'
 import { applyCIMSymbolColor } from '@arcgis/core/symbols/support/cimSymbolUtils'
 import WebStyleSymbol from '@arcgis/core/symbols/WebStyleSymbol'
 import Graphic from '@arcgis/core/Graphic';
-import GeometryProperties from '@arcgis/core/geometry/Point';
+import Point from '@arcgis/core/geometry/Point';
+import Polyline from '@arcgis/core/geometry/Polyline'
 import Color from "@arcgis/core/Color.js";
-import { VehiclePositionPoint } from './query-builders/vehicle-position/vehicle-position-query.model';
+import { VehiclePositionPoint, VehiclePositionPointOnLine } from './query-builders/vehicle-position/vehicle-position-query.model';
 import { ArcGISFeatureQuery } from './query/arcgis-query';
 import { LayerType, Query, QueryType } from './query/query';
 
@@ -95,7 +96,6 @@ export class LayersService {
   async addVehiclePositionPointLayer(layer: RawDataLayer) {
     this.setInitialColor(layer.query);
     // setup layer
-    // TODO do this in a separate function
     const newLayer = new FeatureLayer({
       fields: [
         {
@@ -200,7 +200,6 @@ export class LayersService {
       // this still exists because "supposedly" if the bus 
       // is not on a trip, its route_id, stop_id, and current_status are null
       if (x.trip_id === null || x.trip_id === undefined) {
-        //console.log(locationObject);
         attributes = {
           time: new Date(x._time).getTime(),
           trip_id: x.trip_id,
@@ -213,10 +212,7 @@ export class LayersService {
           longitude: x.longitude,
           bearing: x.bearing,
           stop_id: x.stop_id,
-          current_status: x.current_status,
-          // route_id: "",
-          // stop_id: "",
-          // current_status: ""
+          current_status: x.current_status
         };
       } else {
         attributes = {
@@ -235,9 +231,66 @@ export class LayersService {
         };
       }
       return new Graphic({
-        geometry: point as GeometryProperties,
+        geometry: point as Point,
         attributes: attributes,
       });
+    });
+    // add graphics to layer
+    await newLayer.applyEdits({ addFeatures: graphics });
+    // save layer and tell map component to add the layer
+    this.layers.set(newLayer.id, newLayer);
+    this.addLayerToMap.next(newLayer.id);
+  }
+
+  async addVehiclePositionLineLayer(layer: RawDataLayer) {
+    this.setInitialColor(layer.query);
+    // setup layer
+    const newLayer = new FeatureLayer({
+      fields: [
+        {
+          name: "ObjectID",
+          alias: "ObjectID",
+          type: "oid"
+        },
+        {
+          name: "vehicle_id",
+          alias: "vehicle_id",
+          type: "string"
+        }
+      ],
+      objectIdField: "ObjectID",
+      id: layer.query.time.getTime().toString(), // id of layer is time of query
+      outFields: ["*"],
+      geometryType: "polyline",
+      renderer: new SimpleRenderer({
+        symbol: new SimpleLineSymbol({
+          style: "solid",
+          color: layer.query.color,
+        })
+      }),
+      source: []
+    });
+
+    // set popup template
+    newLayer.popupTemplate = newLayer.createPopupTemplate();
+    newLayer.popupTemplate.title = `{vehicle_id}`;
+    newLayer.popupTemplate.fieldInfos.find((f) => f.fieldName == 'time')?.set('format', { dateFormat: 'short-date-long-time-24' });
+
+    // populate layer with data
+    let data = layer.data.data as { [key: string]: VehiclePositionPointOnLine[] };
+    console.log(data);
+    const graphics = Object.entries(data).map(([vehicle_id, x]) => {
+      var polyline = {
+        type: 'polyline',
+        paths: [x.map(v => [v.longitude, v.latitude])]
+      };
+      var attributes = {
+        vehicle_id: vehicle_id
+      }
+      return new Graphic({
+        geometry: polyline as Polyline,
+        attributes: attributes
+      })
     });
     // add graphics to layer
     await newLayer.applyEdits({ addFeatures: graphics });

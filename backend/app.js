@@ -19,31 +19,55 @@ app.use((req, res, next) => {
     next();
 })
 
-// app.post('/api/posts', (req, res, next) => {
-//     const post = req.body;
-//     console.log(post);
-//     res.status(201).json({
-//         message: 'Post added successfully`'
-//     });
-// })
-
-app.get("/api/realtime/vehicle_position", async (req, res, next) => {
+app.get("/api/vehicle_position/current", async (req, res, next) => {
     try {
         let client = new InfluxClient();
         let filterExpr = 'true';
         if (req.query.whereClauses != undefined) {
             filterExpr = client.buildFilterExpression(JSON.parse(req.query.whereClauses));
         }
-        res.status(201).send(await client.queryCurrentVehiclePosition(filterExpr));
-        console.log("Vehicle Position Query: success");
+        res.status(201).send(await client.queryCurrentVehiclePositions(filterExpr));
+        console.log("Current Vehicle Position Query: success");
     } catch (error) {
         console.error(error)
-        res.status(500).send("An error occurred while fetching the vehicle position proto buffer from the RTD real-time API");
-        console.log("Vehicle Position Query: error");
+        res.status(500).send("An error occurred while fetching the current vehicle position data from influx");
+        console.log("Current Vehicle Position Query: error");
     }
 });
 
-// module.exports = app;
+
+app.get("/api/vehicle_position/past", async (req, res, next) => {
+    try {
+        let client = new InfluxClient();
+        let filterExpr = 'true';
+        if (req.query.whereClauses != undefined) {
+            filterExpr = client.buildFilterExpression(JSON.parse(req.query.whereClauses));
+        }
+        res.status(201).send(await client.queryPastVehiclePositions(req.query.pastTime, filterExpr));
+        console.log("Past Vehicle Position Query: success");
+    } catch (error) {
+        console.error(error)
+        res.status(500).send("An error occurred while fetching the past vehicle position data from influx");
+        console.log("Past Vehicle Position Query: error");
+    }
+});
+
+app.get("/api/vehicle_position/interval", async (req, res, next) => {
+    try {
+        let client = new InfluxClient();
+        let filterExpr = 'true';
+        if (req.query.whereClauses != undefined) {
+            filterExpr = client.buildFilterExpression(JSON.parse(req.query.whereClauses));
+        }
+        res.status(201).send(await client.queryIntervalVehiclePositions(req.query.startTime, req.query.endTime, filterExpr));
+        console.log("Interval Vehicle Position Query: success");
+    } catch (error) {
+        console.error(error)
+        res.status(500).send("An error occurred while fetching the interval vehicle position data from influx");
+        console.log("Interval Vehicle Position Query: error");
+    }
+});
+
 export {
     app
 }

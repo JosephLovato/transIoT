@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable, Subject, catchError, of, tap, throwError }
 import { Query, QueryType } from './query/query';
 import { transit_realtime } from 'gtfs-realtime-bindings';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { VehiclePositionPoint } from './query-builders/vehicle-position/vehicle-position-query.model';
+import { TemporalType, VehiclePositionPoint, VehiclePositionQuery } from './query-builders/vehicle-position/vehicle-position-query.model';
 import { RawDataLayer } from './layer-types';
 
 type FeedMessage = transit_realtime.FeedMessage;
@@ -14,32 +14,35 @@ type FeedMessage = transit_realtime.FeedMessage;
 export class DataService {
   private newLayers = new Subject<RawDataLayer>();
   public newLayers$ = this.newLayers.asObservable();
-  private baseUrl = "http://localhost:3000/api/realtime/"
+  private baseUrl = "http://localhost:3000/api/vehicle_position/"
 
   constructor(private http: HttpClient) { }
 
-  getData(query: Query) {
-    var url = this.baseUrl;
-    switch (query.type) {
-      case QueryType.VehiclePosition:
-        url += "vehicle_position";
-        break;
-      default:
-        throw Error(`Query type not support: ${query.type}`)
-    }
+  fetchVehiclePositionData(query: VehiclePositionQuery) {
+    var url = this.baseUrl + query.temporalType;
     var url_with_params = new URL(url);
-    // build and add where clause filters from NodeClause tree
+
+    // build and add where clause filters
     if (query.whereClauses != null) {
       let result = query.whereClauses.toJson();
       url_with_params.searchParams.append('whereClauses', JSON.stringify(result));
     }
-    // TODO: Add time parameters
+
+    // add time parameters
+    switch (query.temporalType) {
+      case TemporalType.Past:
+        url_with_params.searchParams.append('pastTime', (query.pastTime!.getTime() / 1000).toFixed(0).toString());
+        break;
+      case TemporalType.Interval:
+        url_with_params.searchParams.append('startTime', (query.timeInterval!.start.getTime() / 1000).toFixed(0).toString());
+        url_with_params.searchParams.append('endTime', (query.timeInterval!.end.getTime() / 1000).toFixed(0).toString());
+    }
 
 
     var obvs = this.http.get<any>(url_with_params.toString())
 
     obvs.pipe(
-      tap(_ => console.log("[Data-Service] Fetched vehicle position query from backend")),
+      tap(_ => console.log(`[Data-Service] Fetched Vehicle Position query from backend (${url_with_params.toString()})`)),
       catchError(err => {
         return this.handleError(err, "getData");
       })
