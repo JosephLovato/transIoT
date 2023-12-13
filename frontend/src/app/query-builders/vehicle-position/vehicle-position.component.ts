@@ -7,7 +7,7 @@ import { TemporalType, VehiclePositionQuery, vehiclePositionAttributes } from '.
 import { ClauseNode, LogicalOperator, Operator, WhereClause } from '../../query/where-clauses';
 import { DataService } from 'src/app/data.service';
 import { Observable, catchError, throwError } from 'rxjs';
-import { WhereClauseDialog } from '../where-clause-dialog/where-clause-dialog.component';
+import { WhereClauseDialog } from '../components/where-clause-dialog/where-clause-dialog.component';
 import { dialogflow_v2beta1 } from 'googleapis';
 import { LayerType } from 'src/app/query/query';
 
