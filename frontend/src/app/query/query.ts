@@ -1,4 +1,4 @@
-import { ClauseNode, WhereClause } from "./where-clauses";
+import { ClauseNode } from "./where-clauses";
 
 export abstract class Query {
     // this allows us to access the overridden static member of derived classes
@@ -14,9 +14,9 @@ export abstract class Query {
     name: string;
     abstract view(): string;
     abstract populateAttributes(): void;
-    get id(): string { return this._time.getTime().toString() };
-    public get type(): QueryType { return this._type };
-    public get time(): Date { return this._time };
+    get id(): string { return this._time.getTime().toString() }
+    public get type(): QueryType { return this._type }
+    public get time(): Date { return this._time }
     public get attributes(): Attributes { return this.derivedClass._attributes }
 }
 

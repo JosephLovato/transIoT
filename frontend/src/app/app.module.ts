@@ -40,7 +40,7 @@ import { AppComponent } from './app.component';
 import { EsriMapComponent } from './esri-map/esri-map.component';
 import { VehiclePositionComponent } from './query-builders/vehicle-position/vehicle-position.component';
 import { LayersComponent } from './layers/layers.component';
-import { WhereClauseDialog } from './query-builders/components/where-clause-dialog/where-clause-dialog.component';
+import { WhereClauseDialogComponent } from './query-builders/components/where-clause-dialog/where-clause-dialog.component';
 import { ClauseTreeComponent } from './query-builders/components/clause-tree/clause-tree.component';
 import { EditLayerDialogComponent } from './layers/edit-layer-dialog/edit-layer-dialog.component';
 import { BusStopsComponent } from './query-builders/bus-stops/bus-stops.component';
@@ -53,7 +53,7 @@ import { BusRoutesComponent } from './query-builders/bus-routes/bus-routes.compo
     VehiclePositionComponent,
     LayersComponent,
     ClauseTreeComponent,
-    WhereClauseDialog,
+    WhereClauseDialogComponent,
     EditLayerDialogComponent,
     BusStopsComponent,
     BusRoutesComponent

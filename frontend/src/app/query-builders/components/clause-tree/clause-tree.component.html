@@ -1,10 +1,10 @@
 <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="clause-tree">
     <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
         <button type="button" mat-icon-button (click)="editNode(node)"><mat-icon>edit</mat-icon></button>
-        <div *ngIf="node.nodeType == 'clause'">
+        <div *ngIf="node.nodeType === 'clause'">
             {{node.whereClause.attribute}} {{node.whereClause.operator}} {{node.whereClause.value}}
         </div>
-        <ng-container *ngIf="node.nodeType == 'logical operator'">
+        <ng-container *ngIf="node.nodeType === 'logical operator'">
             <div>
                 <i>Logical Operator: </i><b>{{node.logicalOperator}}</b>
             </div>
@@ -23,10 +23,10 @@
                 </mat-icon>
             </button>
             <button type="button" mat-icon-button (click)="editNode(node)"><mat-icon>edit</mat-icon></button>
-            <div *ngIf="node.nodeType == 'clause'">
+            <div *ngIf="node.nodeType === 'clause'">
                 {{node.whereClause.attribute}} {{node.whereClause.operator}} {{node.whereClause.value}}
             </div>
-            <ng-container *ngIf="node.nodeType == 'logical operator'">
+            <ng-container *ngIf="node.nodeType === 'logical operator'">
                 <div>
                     <i>Logical Operator: </i><b>{{node.logicalOperator}}</b>
                 </div>

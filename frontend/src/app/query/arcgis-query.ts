@@ -11,13 +11,13 @@ export abstract class ArcGISFeatureQuery extends Query {
     protected popupTemplateTitleField: string | undefined = undefined;
 
     override async populateAttributes() {
-        let attrs: Attributes = {};
+        const attrs: Attributes = {};
         this.derivedClass.featureLayer.fields.forEach(async field => {
-            let unique = await uniqueValues({
+            const unique = await uniqueValues({
                 layer: this.derivedClass.featureLayer,
                 field: field.name
             })
-            let possVals: { [key: string | number]: string | number } = {};
+            const possVals: { [key: string | number]: string | number } = {};
             unique.uniqueValueInfos.forEach(info => {
                 possVals[info.value] = info.value
             })
@@ -32,7 +32,7 @@ export abstract class ArcGISFeatureQuery extends Query {
 
     async fetchLayer() {
         // fetch full feature layer on static initialization
-        let f = new FeatureLayer({
+        const f = new FeatureLayer({
             url: this.url,
             outFields: ["*"]
         })
@@ -40,7 +40,7 @@ export abstract class ArcGISFeatureQuery extends Query {
         this.derivedClass.featureLayer = f;
     }
 
-    public get url(): string { return this._url };
+    public get url(): string { return this._url }
 
     /**
      * Accessor for the base ArcGIS feature layer of this query

@@ -1,11 +1,9 @@
-import { Injectable, OnDestroy, OnInit } from '@angular/core';
-import { BehaviorSubject, Subject, Subscription } from 'rxjs';
-import { DataService } from './data.service';
+import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
 import { RawDataLayer } from './layer-types';
 import Layer from '@arcgis/core/layers/Layer';
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import SimpleRenderer from '@arcgis/core/renderers/SimpleRenderer'
-import SizeVariable from '@arcgis/core/renderers/visualVariables/SizeVariable'
 import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
 import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol'
 import CIMSymbol from '@arcgis/core/symbols/CIMSymbol'
@@ -15,9 +13,9 @@ import Graphic from '@arcgis/core/Graphic';
 import Point from '@arcgis/core/geometry/Point';
 import Polyline from '@arcgis/core/geometry/Polyline'
 import Color from "@arcgis/core/Color.js";
-import { VehiclePositionPoint, VehiclePositionPointOnLine } from './query-builders/vehicle-position/vehicle-position-query.model';
+import { VehicleIntervalPositionsAPI, VehiclePositionAPI } from './query-builders/vehicle-position/vehicle-position-api.model';
 import { ArcGISFeatureQuery } from './query/arcgis-query';
-import { LayerType, Query, QueryType } from './query/query';
+import { LayerType, Query } from './query/query';
 
 @Injectable({
   providedIn: 'root'
@@ -61,7 +59,7 @@ export class LayersService {
   }
 
   changeLayerColor(id: string, color: string) {
-    var l = this.layers.get(id);
+    const l = this.layers.get(id);
     if (l instanceof FeatureLayer) {
       const symbol = ((l as FeatureLayer).renderer as
         SimpleRenderer).symbol;
@@ -70,19 +68,25 @@ export class LayersService {
         case 'simple-line':
           (symbol as SimpleMarkerSymbol).color = new Color(color);
           break;
-        case 'cim':
+        case 'cim': {
           const cimSymbol = symbol as CIMSymbol;
           applyCIMSymbolColor(cimSymbol, new Color(color));
           cimSymbol.color = new Color(color); // not sure why but we need this too
           break;
-        case 'simple-line':
+        }
+        // case 'simple-line':
 
       }
     }
   }
 
   toggleLayerVisibility(id: string) {
-    this.layers.get(id)!.visible = !this.layers.get(id)?.visible;
+    const layer = this.getLayer(id);
+    if (layer) {
+      layer.visible = !layer.visible;
+    } else {
+      console.error("[Layers-Service] Cannot find layer to toggle visibility")
+    }
   }
 
   deleteLayer(id: string) {
@@ -94,6 +98,7 @@ export class LayersService {
   /* *************************** */
 
   async addVehiclePositionPointLayer(layer: RawDataLayer) {
+    const response = layer.data as VehiclePositionAPI;
     this.setInitialColor(layer.query);
     // setup layer
     const newLayer = new FeatureLayer({
@@ -189,14 +194,15 @@ export class LayersService {
     newLayer.popupTemplate.fieldInfos.find((f) => f.fieldName == 'time')?.set('format', { dateFormat: 'short-date-long-time-24' });
 
     // populate layer with data
-    let data = layer.data.data as VehiclePositionPoint[];
+    const data = response.data;
+    console.log(data);
     const graphics = data.map(x => {
-      var point = {
+      const point = {
         type: "point", // autocasts as new Polyline()
         latitude: x.latitude,
         longitude: x.longitude
       };
-      var attributes;
+      let attributes;
       // this still exists because "supposedly" if the bus 
       // is not on a trip, its route_id, stop_id, and current_status are null
       if (x.trip_id === null || x.trip_id === undefined) {
@@ -243,6 +249,7 @@ export class LayersService {
   }
 
   async addVehiclePositionLineLayer(layer: RawDataLayer) {
+    const response = layer.data as VehicleIntervalPositionsAPI;
     this.setInitialColor(layer.query);
     // setup layer
     const newLayer = new FeatureLayer({
@@ -277,14 +284,14 @@ export class LayersService {
     newLayer.popupTemplate.fieldInfos.find((f) => f.fieldName == 'time')?.set('format', { dateFormat: 'short-date-long-time-24' });
 
     // populate layer with data
-    let data = layer.data.data as { [key: string]: VehiclePositionPointOnLine[] };
+    const data = response.data;
     console.log(data);
     const graphics = Object.entries(data).map(([vehicle_id, x]) => {
-      var polyline = {
+      const polyline = {
         type: 'polyline',
         paths: [x.map(v => [v.longitude, v.latitude])]
       };
-      var attributes = {
+      const attributes = {
         vehicle_id: vehicle_id
       }
       return new Graphic({
@@ -305,14 +312,14 @@ export class LayersService {
 
   async addArcGISFeatureLayer(query: ArcGISFeatureQuery) {
     // create copy of static layer from query
-    var newLayer: FeatureLayer = query.getFeatureLayer().clone();
+    const newLayer: FeatureLayer = query.getFeatureLayer().clone();
 
     // set some properties
     this.setInitialColor(query);
     newLayer.id = query.time.getTime().toString();
 
     if (query.layerType == LayerType.Point) {
-      var renderer: SimpleRenderer = new SimpleRenderer;
+      const renderer: SimpleRenderer = new SimpleRenderer;
       const symbol = new WebStyleSymbol({
         name: query.getWebStyleSymbolName(),
         styleName: "Esri2DPointSymbolsStyle",
@@ -347,11 +354,11 @@ export class LayersService {
     await newLayer.load();
     newLayer.popupTemplate = newLayer.createPopupTemplate();
     if (query.getPopupTemplateTitleField() != undefined) {
-      newLayer.popupTemplate.title = `{${query.getPopupTemplateTitleField()!}}`;
+      newLayer.popupTemplate.title = `{${query?.getPopupTemplateTitleField()}}`;
     }
 
     // build where clause definition expression as a string
-    var defExpr = query.whereClauses == undefined ? '' : query.whereClauses!.toSQLString();
+    const defExpr = query.whereClauses == undefined ? '' : query.whereClauses?.toSQLString();
     newLayer.definitionExpression = defExpr;
 
     // save layer here

@@ -1,10 +1,11 @@
-import { Component, Input, OnInit, ChangeDetectorRef, EventEmitter, Output, OnChanges, SimpleChanges } from '@angular/core';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { Component, Input, OnInit, EventEmitter, Output } from '@angular/core';
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { MatDialog } from '@angular/material/dialog';
 import { FormControl, FormGroupDirective } from '@angular/forms'
-import { ClauseNode, LogicalOperator } from 'src/app/query/where-clauses';
-import { WhereClauseDialog } from '../where-clause-dialog/where-clause-dialog.component';
+import { ClauseNode } from 'src/app/query/where-clauses';
+import { WhereClauseDialogComponent } from '../where-clause-dialog/where-clause-dialog.component';
 import { Attributes } from 'src/app/query/query';
 import { BehaviorSubject, lastValueFrom } from 'rxjs';
 
@@ -58,7 +59,7 @@ export class ClauseTreeComponent implements OnInit {
   }
 
   addNode(node: ClauseNode) {
-    let c = new ClauseNode();
+    const c = new ClauseNode();
     c.parent = node;
     node.children?.push(c);
     this.dataSource.data = []; // current hack to get DOM to update
@@ -69,7 +70,7 @@ export class ClauseTreeComponent implements OnInit {
   async editNode(node: ClauseNode) {
     console.log("[<Clause-Tree>]: editing node: ", node.id);
     // open dialog to edit
-    const dialogRef = this.dialog.open(WhereClauseDialog, {
+    const dialogRef = this.dialog.open(WhereClauseDialogComponent, {
       width: '30%',
       data: {
         node: node,
@@ -77,7 +78,7 @@ export class ClauseTreeComponent implements OnInit {
       }
     });
     // wait for dialog to return the edited node
-    let editedNode = await lastValueFrom<ClauseNode>(dialogRef.afterClosed());
+    const editedNode = await lastValueFrom<ClauseNode>(dialogRef.afterClosed());
     if (editedNode == null) return; // don't do anything if the dialog was 'canceled'
     // manually inject edited values (only way that worked)
     node.id = editedNode.id;
@@ -105,12 +106,13 @@ export class ClauseTreeComponent implements OnInit {
         this.rootNodeDeleted.emit(true);
       }
     } else {
+      // node is known *not* to be root, so turning on eslint rule for no-non-null-assertion
       if (this.hasChild(0, node)) {
         if (confirm("Deleting this logical operator will delete all children clauses and operators. Are you sure you want to delete?")) {
-          node.parent!.children = node.parent?.children.filter(n => n !== node)!;
+          node.parent!.children = node.parent!.children.filter(n => n !== node);
         }
       } else {
-        node.parent!.children = node.parent?.children.filter(n => n !== node)!;
+        node.parent!.children = node.parent!.children.filter(n => n !== node)!;
       }
     }
     // TODO: refactor into function

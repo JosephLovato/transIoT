@@ -1,5 +1,5 @@
 import { ArcGISFeatureQuery } from 'src/app/query/arcgis-query';
-import { Attribute, Attributes, LayerType, Query, QueryType } from 'src/app/query/query';
+import { LayerType, QueryType } from 'src/app/query/query';
 
 export class BusStopsQuery extends ArcGISFeatureQuery {
     protected override _url: string = 'https://services5.arcgis.com/1fZoXlzLW6FCIUcE/ArcGIS/rest/services/RTD_GIS_Current_Runboard/FeatureServer/2';

@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { LayersService } from 'src/app/layers.service';
 import { BusRoutesQuery } from './bus-routes-query.model';
 import { ClauseNode } from 'src/app/query/where-clauses';
+import { Attributes } from 'src/app/query/query';
 
 @Component({
   selector: 'app-bus-routes',
@@ -15,7 +16,7 @@ export class BusRoutesComponent implements OnInit {
   whereClausesPresent = false;
   refresh: number = 0;
   queryForm!: FormGroup;
-  attributes: any;
+  attributes: Attributes;
 
   constructor(
     private fb: FormBuilder,
@@ -24,7 +25,7 @@ export class BusRoutesComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.initializeForm();
-    let brq = await BusRoutesQuery.build();
+    const brq = await BusRoutesQuery.build();
     this.attributes = brq.attributes;
     this.submitted = false;
     this.whereClausesPresent = false;
@@ -39,8 +40,8 @@ export class BusRoutesComponent implements OnInit {
   onSubmit() {
     this.submitted = true;
     // build query object from form
-    var query: BusRoutesQuery =
-      new BusRoutesQuery(this.queryForm.value as any, this.sequence);
+    const query: BusRoutesQuery =
+      new BusRoutesQuery(this.queryForm.value, this.sequence);
     this.sequence++;
 
     // null-out where clauses if not present

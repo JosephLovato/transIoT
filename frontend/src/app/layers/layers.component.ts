@@ -1,14 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { LayersService } from '../layers.service';
 import { DataService } from '../data.service';
 import { Subscription, lastValueFrom } from 'rxjs';
 import { RawDataLayer } from '../layer-types';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { LayerType, Query, QueryType } from '../query/query';
-import { query } from 'express';
 import { MatDialog } from '@angular/material/dialog';
 import { EditLayerDialogComponent } from './edit-layer-dialog/edit-layer-dialog.component';
-import { ArcGISFeatureQuery } from '../query/arcgis-query';
 import { LayerView } from './layer-view.model';
 
 @Component({
@@ -16,7 +14,7 @@ import { LayerView } from './layer-view.model';
   templateUrl: './layers.component.html',
   styleUrls: ['./layers.component.css']
 })
-export class LayersComponent {
+export class LayersComponent implements OnInit, OnDestroy {
   private newRawDataLayerSub: Subscription;
   private newLayerServiceLayerSub: Subscription;
   public layerViews: LayerView[] = [];

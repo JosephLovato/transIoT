@@ -1,14 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { NestedTreeControl } from '@angular/cdk/tree';
-import { MatTreeNestedDataSource } from '@angular/material/tree';
-import { Dialog, DialogRef } from '@angular/cdk/dialog'
-import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { ClauseNode, LogicalOperator, Operator, WhereClause } from '../../query/where-clauses';
-import { DataService } from 'src/app/data.service';
-import { Observable, catchError, throwError } from 'rxjs';
-import { WhereClauseDialog } from '../components/where-clause-dialog/where-clause-dialog.component';
-import { dialogflow_v2beta1 } from 'googleapis';
-import { LayerType } from 'src/app/query/query';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { ClauseNode } from '../../query/where-clauses';
+import { Attributes } from 'src/app/query/query';
 import { BusStopsQuery } from './bus-stops-query.model';
 import { LayersService } from 'src/app/layers.service';
 
@@ -23,7 +16,7 @@ export class BusStopsComponent implements OnInit {
   whereClausesPresent = false;
   refresh: number = 0;
   queryForm!: FormGroup;
-  attributes: any;
+  attributes: Attributes;
 
   constructor(
     private fb: FormBuilder,
@@ -33,7 +26,7 @@ export class BusStopsComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.initializeForm();
-    let bsq = await BusStopsQuery.build();
+    const bsq = await BusStopsQuery.build();
     this.attributes = bsq.attributes;
     this.submitted = false;
     this.whereClausesPresent = false;
@@ -49,8 +42,8 @@ export class BusStopsComponent implements OnInit {
   onSubmit() {
     this.submitted = true;
     // build query object from form
-    var query: BusStopsQuery =
-      new BusStopsQuery(this.queryForm.value as any, this.sequence);
+    const query: BusStopsQuery =
+      new BusStopsQuery(this.queryForm.value, this.sequence);
     this.sequence++;
 
     // null-out where clauses if not present

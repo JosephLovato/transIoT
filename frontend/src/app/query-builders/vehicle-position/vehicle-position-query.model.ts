@@ -1,5 +1,5 @@
 import { InfluxQuery } from 'src/app/query/influx-query';
-import { Attribute, Attributes, LayerType, Query, QueryType } from 'src/app/query/query';
+import { Attributes, QueryType } from 'src/app/query/query';
 
 export const vehiclePositionAttributes: Attributes = {
     trip_id: { name: 'trip_id', type: 'string', possibleValues: {} },
@@ -57,25 +57,4 @@ export enum TemporalType {
 }
 
 
-export interface VehiclePositionPoint {
-    _time: string;
-    trip_id: string;
-    route_id: string;
-    direction_id: string;
-    schedule_relationship: string;
-    vehicle_id: string;
-    vehicle_label: string;
-    latitude: number;
-    longitude: number;
-    bearing: number;
-    stop_id: string;
-    current_status: string;
-}
-
-export interface VehiclePositionPointOnLine {
-    time: string;
-    latitude: number;
-    longitude: number;
-    route_id: string
-}
 

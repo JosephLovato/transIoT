@@ -41,7 +41,7 @@ export class ClauseNode {
      * Converts the where clause tree to a JSON object
      * @returns JSON object
      */
-    toJson(): any {
+    toJson(): object {
         if (this.nodeType == NodeType.LogicalOperator) {
             return {
                 logicalOperator: this.logicalOperator,

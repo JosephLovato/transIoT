@@ -22,7 +22,7 @@ export class EsriMapComponent implements OnInit, OnDestroy {
   @ViewChild('mapViewNode', { static: true }) private mapViewEl!: ElementRef;
 
 
-  initializeMap(): Promise<any> {
+  initializeMap(): Promise<unknown> {
     const container = this.mapViewEl.nativeElement;
 
     const webmap = new WebMap({
@@ -40,17 +40,27 @@ export class EsriMapComponent implements OnInit, OnDestroy {
     return this.view.when();
   }
 
-  ngOnInit(): any {
+  ngOnInit(): void {
     this.initializeMap().then(() => {
       console.log("[Esri-Map-Component] Initialized Map");
     })
     this.addLayerSub$ = this.layersService.addLayerToMap$
       .subscribe((id: string) => {
-        this.view.map.add(this.layersService.getLayer(id)!);
+        const layer = this.layersService.getLayer(id)
+        if (layer) {
+          this.view.map.add(layer);
+        } else {
+          console.error("[Esri-Map-Component] Cannot find layer in Layers-Service to add")
+        }
       });
     this.removeLayerSub$ = this.layersService.removeLayerFromMap$
       .subscribe((id: string) => {
-        this.view.map.remove(this.layersService.getLayer(id)!);
+        const layer = this.layersService.getLayer(id)
+        if (layer) {
+          this.view.map.remove(layer);
+        } else {
+          console.error("[Esri-Map-Component] Cannot find layer in Layers-Service to remove")
+        }
       })
   }
 

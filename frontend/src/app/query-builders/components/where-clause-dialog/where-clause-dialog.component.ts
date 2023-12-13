@@ -1,18 +1,18 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { FormBuilder, FormGroup, FormControl, AbstractControl } from '@angular/forms'
-import { MatDialog, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
+import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, AbstractControl } from '@angular/forms'
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 import { ClauseNode, LogicalOperator, Operator, WhereClause, NodeType } from 'src/app/query/where-clauses';
 import { Attribute, Attributes } from 'src/app/query/query';
 import { DialogData } from '../clause-tree/clause-tree.component';
 import { Observable, map, pairwise, startWith } from 'rxjs';
 
 @Component({
-    selector: 'where-clause-dialog',
+    selector: 'app-where-clause-dialog',
     templateUrl: 'where-clause-dialog.component.html',
     styleUrls: ['./where-clause-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class WhereClauseDialog {
+export class WhereClauseDialogComponent implements OnInit {
     clauseForm: FormGroup;
     whereOps = Object.values(Operator);
     logicalOps = Object.values(LogicalOperator);
@@ -24,7 +24,7 @@ export class WhereClauseDialog {
     nodeType: NodeType = NodeType.Clause;
 
     constructor(
-        public dialogRef: MatDialogRef<WhereClauseDialog, ClauseNode>,
+        public dialogRef: MatDialogRef<WhereClauseDialogComponent, ClauseNode>,
         @Inject(MAT_DIALOG_DATA) public data: DialogData,
         private fb: FormBuilder) { }
 
@@ -61,24 +61,24 @@ export class WhereClauseDialog {
 
         // watch value changes on nodeType to enable/disable dynamically
         this.clauseForm.get('nodeType')?.valueChanges
-            .pipe(startWith(this.clauseForm.get('nodeType')!.getRawValue()), pairwise())
+            .pipe(startWith(this.clauseForm.get('nodeType')?.getRawValue()), pairwise())
             .subscribe(([old, value]) => {
                 if (old != value) {
-                    this.toggleFormField(this.clauseForm.get('logicalOperator')!);
-                    this.toggleFormField(this.clauseForm.get('whereClause')!);
+                    this.toggleFormField(this.clauseForm.get('logicalOperator'));
+                    this.toggleFormField(this.clauseForm.get('whereClause'));
                 }
             });
 
         // watch value changes on attribute to change properties of input
         this.clauseForm.get('whereClause')?.get('attribute')?.valueChanges
             .pipe(startWith(this.clauseForm.get('whereClause')?.get('attribute')?.getRawValue()))
-            .subscribe(value => {
+            .subscribe(() => {
                 // this.clauseForm.get('whereClause')?.get('value')?.ty
             });
 
         // change drop down list when attribute changes
-        this.clauseForm.get('whereClause')!.get('attribute')!.valueChanges
-            .pipe(startWith(this.clauseForm.get('whereClause')!.get('attribute')!.value))
+        this.clauseForm.get('whereClause')?.get('attribute')?.valueChanges
+            .pipe(startWith(this.clauseForm.get('whereClause')?.get('attribute')?.value))
             .subscribe(attr => {
                 // don't do anything if the attribute is not set
                 if (!attr) {
@@ -89,6 +89,8 @@ export class WhereClauseDialog {
                     this.currentValueOptions = Object.keys(this.attributes[attr].possibleValues as { [key: string]: string });
                 }
                 // inject filter to drop down list
+                // TODO see if this can be done without non-null assertion
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 this.currentValueFilteredOptions = this.clauseForm.get('whereClause')!.get('value')!.valueChanges.pipe(
                     startWith(''),
                     map(value => this._filter(value || ''))
@@ -111,8 +113,8 @@ export class WhereClauseDialog {
             }
         } else {
             // user did not change node type
-            var clause: WhereClause = { ...this.clauseForm.value.whereClause };
-            clause.valueType = this.attributes[clause.attribute].type; // << ^^ quick hack to get attribute type
+            const clause: WhereClause = { ...this.clauseForm.value.whereClause };
+            clause.valueType = this.attributes[clause.attribute].type; // << ^^ quick hack to get attribute type // TODO may already be logical operater node, can't get value type
             this.dialogRef.close({ ...this.clauseForm.value, children: this.data.node.children, id: this.data.node.id, parent: this.data.node.parent, whereClause: clause });
         }
 
@@ -122,7 +124,8 @@ export class WhereClauseDialog {
         this.dialogRef.close();
     }
 
-    toggleFormField(formControl: AbstractControl) {
+    toggleFormField(formControl: AbstractControl | null) {
+        if (formControl === null) return;
         if (formControl.enabled) {
             formControl.disable();
         } else {

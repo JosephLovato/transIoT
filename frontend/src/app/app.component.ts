@@ -8,5 +8,5 @@ import { Component, ViewContainerRef } from '@angular/core';
 export class AppComponent {
   title = 'transIoT';
 
-  constructor(public vcRef: ViewContainerRef) { };
+  constructor(public vcRef: ViewContainerRef) { }
 }

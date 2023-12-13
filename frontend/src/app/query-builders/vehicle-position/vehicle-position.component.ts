@@ -1,14 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { NestedTreeControl } from '@angular/cdk/tree';
-import { MatTreeNestedDataSource } from '@angular/material/tree';
-import { Dialog, DialogRef } from '@angular/cdk/dialog'
-import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { TemporalType, VehiclePositionQuery, vehiclePositionAttributes } from './vehicle-position-query.model';
-import { ClauseNode, LogicalOperator, Operator, WhereClause } from '../../query/where-clauses';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { TemporalType, VehiclePositionQuery } from './vehicle-position-query.model';
+import { ClauseNode } from '../../query/where-clauses';
 import { DataService } from 'src/app/data.service';
-import { Observable, catchError, throwError } from 'rxjs';
-import { WhereClauseDialog } from '../components/where-clause-dialog/where-clause-dialog.component';
-import { dialogflow_v2beta1 } from 'googleapis';
+import { Observable, catchError } from 'rxjs';
 import { LayerType } from 'src/app/query/query';
 
 @Component({
@@ -54,8 +49,8 @@ export class VehiclePositionComponent implements OnInit {
   onSubmit() {
     this.submitted = true;
     // build query object from form
-    var query: VehiclePositionQuery =
-      new VehiclePositionQuery(this.queryForm.value as any, this.sequence);
+    const query: VehiclePositionQuery =
+      new VehiclePositionQuery(this.queryForm.value, this.sequence);
     this.sequence++;
 
     // set layer type based on user's time input
@@ -70,11 +65,11 @@ export class VehiclePositionComponent implements OnInit {
     // call data service to fetch query
     this.dataService.fetchVehiclePositionData(query)
       // catch any errors from the result of the query
-      .pipe(catchError(err => {
+      .pipe(catchError(() => {
         console.log("ERROR");
         this.sequence--;
         return new Observable();
-      })).subscribe(result => {
+      })).subscribe(() => {
         // if no errors, reinitialize and tell clause tree to refresh
         this.ngOnInit();
         this.refresh++;

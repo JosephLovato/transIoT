@@ -9,7 +9,7 @@
                 </mat-option>
             </mat-select>
         </mat-form-field>
-        <div [hidden]="queryForm.get('temporalType')?.value != 'past'">
+        <div [hidden]="queryForm.get('temporalType')?.value !== 'past'">
             <mat-form-field>
                 <input matInput #ppast [ngxMatDatetimePicker]="pickerPast" formControlName="pastTime"
                     placeholder="date & time">
@@ -17,7 +17,7 @@
                 <ngx-mat-datetime-picker #pickerPast [enableMeridian]="true"></ngx-mat-datetime-picker>
             </mat-form-field>
         </div>
-        <div formGroupName="timeInterval" [hidden]="queryForm.get('temporalType')?.value != 'interval'">
+        <div formGroupName="timeInterval" [hidden]="queryForm.get('temporalType')?.value !== 'interval'">
             <mat-form-field>
                 <mat-label>Start</mat-label>
                 <input matInput #pstart [ngxMatDatetimePicker]="pickerFrom" formControlName="start"
