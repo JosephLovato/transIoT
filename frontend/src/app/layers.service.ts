@@ -15,7 +15,8 @@ import Polyline from '@arcgis/core/geometry/Polyline'
 import Color from "@arcgis/core/Color.js";
 import { VehicleIntervalPositionsAPI, VehiclePositionAPI } from './query-builders/vehicle-position/vehicle-position-api.model';
 import { ArcGISFeatureQuery } from './query/arcgis-query';
-import { LayerType, Query } from './query/query';
+import { LayerType, Query, QueryType } from './query/query';
+import { DataService } from './data.service';
 
 @Injectable({
   providedIn: 'root'
@@ -44,6 +45,30 @@ export class LayersService {
 
   private addLayerToLayersView = new Subject<Query>();
   public addLayerToLayersView$ = this.addLayerToLayersView.asObservable();
+
+  constructor(private dataService: DataService) {
+    this.dataService.newLayers$.subscribe(layer => {
+      // send to appropriate function to be saved and rendered as an esri layer
+      switch (layer.query.layerType) {
+        case LayerType.Point:
+          switch (layer.query.type) {
+            case QueryType.VehiclePosition:
+              this.addVehiclePositionPointLayer(layer);
+          }
+          break;
+        case LayerType.Line:
+          switch (layer.query.type) {
+            case QueryType.VehiclePosition:
+              this.addVehiclePositionLineLayer(layer);
+          }
+          break;
+        default:
+          throw (`Layer type not support by layers service: ${layer.query.layerType}`)
+      }
+      // send query to layers component
+      this.addLayerToLayersView.next(layer.query);
+    });
+  }
 
   getLayer(id: string) {
     return this.layers.get(id);

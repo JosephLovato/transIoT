@@ -1,10 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { LayersService } from '../layers.service';
-import { DataService } from '../data.service';
 import { Subscription, lastValueFrom } from 'rxjs';
-import { RawDataLayer } from '../layer-types';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { LayerType, Query, QueryType } from '../query/query';
+import { Query } from '../query/query';
 import { MatDialog } from '@angular/material/dialog';
 import { EditLayerDialogComponent } from './edit-layer-dialog/edit-layer-dialog.component';
 import { LayerView } from './layer-view.model';
@@ -15,52 +13,23 @@ import { LayerView } from './layer-view.model';
   styleUrls: ['./layers.component.css']
 })
 export class LayersComponent implements OnInit, OnDestroy {
-  private newRawDataLayerSub: Subscription;
-  private newLayerServiceLayerSub: Subscription;
+  private addLayerToLayersViewSub: Subscription;
   public layerViews: LayerView[] = [];
 
   constructor(
-    private dataService: DataService,
     private layersService: LayersService,
     private dialog: MatDialog) { }
 
   ngOnDestroy(): void {
-    this.newRawDataLayerSub.unsubscribe();
+    this.addLayerToLayersViewSub.unsubscribe();
   }
 
   ngOnInit(): void {
-    // subscribe to raw data layers sent from the data service
-    this.newRawDataLayerSub = this.dataService.newLayers$
-      .subscribe((layer: RawDataLayer) => {
-        // send to appropriate layers service function to be saved and rendered as an esri layer
-        switch (layer.query.layerType) {
-          case LayerType.Point:
-            switch (layer.query.type) {
-              case QueryType.VehiclePosition:
-                this.layersService.addVehiclePositionPointLayer(layer);
-            }
-            break;
-          case LayerType.Line:
-            switch (layer.query.type) {
-              case QueryType.VehiclePosition:
-                this.layersService.addVehiclePositionLineLayer(layer);
-            }
-            break;
-          default:
-            throw (`Layer type not support by layers service: ${layer.query.layerType}`)
-        }
-
-        // save here to be displayed
-        this.layerViews.push({ query: layer.query, selected: false });
-      })
-    this.dataService.newLayers$.subscribe(); // TODO: is this needed?
-
-    // subscribe to queries sent from the layers service (static layers)
-    this.newLayerServiceLayerSub = this.layersService.addLayerToLayersView$
+    // subscribe to queries sent from the layers service
+    this.addLayerToLayersViewSub = this.layersService.addLayerToLayersView$
       .subscribe((layer: Query) => {
         this.layerViews.push({ query: layer, selected: false });
       });
-
   }
 
   drop(event: CdkDragDrop<string[]>) {
