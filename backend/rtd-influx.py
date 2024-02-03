@@ -24,7 +24,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 # gtfs realtime
 from google.transit import gtfs_realtime_pb2 as gtfs
 # url requesting
-from urllib.request import Request, urlopen, urlretrieve
+import urllib3
 
 sample_rate = 40
 ingest_count = 0
@@ -47,15 +47,13 @@ logging.basicConfig(
 )
 
 
-def ingest_to_influx(req):
-    '''Ingest all data from the protobuf file fetched into param:req from RTD's restful API'''
+def ingest_to_influx(data):
+    '''Ingest all data from the protobuf file fetched from RTD's restful API'''
     global ingest_count
     feed = gtfs.FeedMessage()
-    response = urlopen(req)
-    feed.ParseFromString(response.read())
+    feed.ParseFromString(data)
     with InfluxDBClient(url=url, token=token, org=org) as client:
         write_api = client.write_api(write_options=SYNCHRONOUS)
-        count = 0
         points = []
         for entity in feed.entity:
             point = Point("vehicle_position") \
@@ -80,18 +78,15 @@ def ingest_to_influx(req):
 
 while True:
     # Retrieve protobuf file via RTD's restful API
-    req = Request('https://rtd.prod.acquia-sites.com/files/gtfs-rt/VehiclePosition.pb',
-                  headers={'User-Agent': 'Mozilla/5.0'})
-    with urlopen(req) as response:
-        body = response.read()
+    response = urllib3.request('GET', 'https://www.rtd-denver.com/files/gtfs-rt/VehiclePosition.pb', headers={'User-Agent': 'Mozilla/5.0'})
     with open("tmp-now.txt", mode="wb") as html_file:
-        html_file.write(body)
+        html_file.write(response.data)
 
     # If the protobuffer has new data, ingest to influxdb
     same = filecmp.cmp("tmp-prev.txt", "tmp-now.txt")
     if(not same):
         try:
-            ingest_to_influx(req)
+            ingest_to_influx(response.data)
         except:
             logging.error("Error in injecting. Continuing...")
     else:
