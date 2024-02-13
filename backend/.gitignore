@@ -14,7 +14,8 @@ node_modules
 .vscode
 
 # misc
-tmp-prev.txt
+tmp-prev.pb
+tmp-now.pb
 copy
 copy.zip
 expr.js

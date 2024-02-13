@@ -36,6 +36,10 @@ org = "rtd-local"
 bucket = "RTD-GTFS-NEW"
 url = "http://localhost:8086"
 
+# Setup temp file
+f = open("tmp-prev.pb", "w")
+f.close()
+
 # Setup Logging
 logging.basicConfig(
     level=logging.INFO,
@@ -78,12 +82,18 @@ def ingest_to_influx(data):
 
 while True:
     # Retrieve protobuf file via RTD's restful API
-    response = urllib3.request('GET', 'https://www.rtd-denver.com/files/gtfs-rt/VehiclePosition.pb', headers={'User-Agent': 'Mozilla/5.0'})
-    with open("tmp-now.txt", mode="wb") as html_file:
+    try:
+        response = urllib3.request('GET', 'https://www.rtd-denver.com/files/gtfs-rt/VehiclePosition.pb', headers={'User-Agent': 'Mozilla/5.0'})
+    except:
+        logging.error("Error in fetching data from RTD. Continuing...")
+        time.sleep(sample_rate)
+        continue
+    
+    with open("tmp-now.pb", mode="wb") as html_file:
         html_file.write(response.data)
 
     # If the protobuffer has new data, ingest to influxdb
-    same = filecmp.cmp("tmp-prev.txt", "tmp-now.txt")
+    same = filecmp.cmp("tmp-prev.pb", "tmp-now.pb")
     if(not same):
         try:
             ingest_to_influx(response.data)
@@ -92,6 +102,6 @@ while True:
     else:
         logging.info("Data did not change... continuing")
     # Move current file to previous for next comparison
-    os.rename("tmp-now.txt", "tmp-prev.txt")
+    os.rename("tmp-now.pb", "tmp-prev.pb")
 
     time.sleep(sample_rate)
