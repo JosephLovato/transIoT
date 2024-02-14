@@ -4,12 +4,10 @@
 **/
 
 import { InfluxDB } from '@influxdata/influxdb-client'
-import dotenv from 'dotenv'
 
 /** Environment variables and constants **/
-dotenv.config();
 const token = process.env.INFLUX_TOKEN
-const url = "http://localhost:8086"
+const url = process.env.INFLUX_HOST
 const org = "rtd-local"
 
 
@@ -105,9 +103,9 @@ export class InfluxClient {
             |> group(columns: ["vehicle_id"])
             |> drop(columns: ["_start", "_stop", "_measurement"])`;
         let results = {};
-        for await (const {values, tableMeta} of this.queryApi.iterateRows(fluxQuery)) {
+        for await (const { values, tableMeta } of this.queryApi.iterateRows(fluxQuery)) {
             const entry = tableMeta.toObject(values);
-            if(results[entry.vehicle_id] == undefined) {
+            if (results[entry.vehicle_id] == undefined) {
                 results[entry.vehicle_id] = [];
             }
             results[entry.vehicle_id].push({

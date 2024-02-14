@@ -17,7 +17,6 @@ import os
 import filecmp
 import time
 import logging
-from dotenv import load_dotenv
 # influx
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
@@ -30,11 +29,10 @@ sample_rate = 40
 ingest_count = 0
 
 # Setup Influx API
-load_dotenv()
 token = os.getenv("INFLUX_TOKEN")
 org = "rtd-local"
 bucket = "RTD-GTFS-NEW"
-url = "http://localhost:8086"
+url = os.getenv("INFLUX_HOST")
 
 # Setup temp file
 f = open("tmp-prev.pb", "w")
@@ -97,8 +95,8 @@ while True:
     if(not same):
         try:
             ingest_to_influx(response.data)
-        except:
-            logging.error("Error in injecting. Continuing...")
+        except Exception as error:
+            logging.error(f"Error during ingestion to influx: {error}. Continuing...")
     else:
         logging.info("Data did not change... continuing")
     # Move current file to previous for next comparison

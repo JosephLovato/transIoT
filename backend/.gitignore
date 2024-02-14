@@ -16,7 +16,4 @@ node_modules
 # misc
 tmp-prev.pb
 tmp-now.pb
-copy
-copy.zip
-expr.js
-test.txt
+misc/

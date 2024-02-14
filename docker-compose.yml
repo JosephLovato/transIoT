@@ -1,0 +1,23 @@
+services:
+  influxdb:
+    image: influxdb:2.7-alpine
+    ports:
+      - 8086:8086
+    expose:
+      - "8086"
+    volumes:
+      - ~/.influxdbv2/:/var/lib/influxdb2
+  ingest:
+    build: backend/ingest
+    env_file:
+      - path: ./.env
+  backend:
+    build: backend
+    env_file:
+      - path: ./.env
+    ports:
+      - 3000:3000
+  frontend:
+    build: frontend
+    
+
