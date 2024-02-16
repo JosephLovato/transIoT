@@ -1,7 +1,7 @@
 export interface WhereClause {
     attribute: string,
     operator: Operator,
-    value: string,
+    value: string | number,
     valueType?: string
 }
 

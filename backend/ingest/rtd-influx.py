@@ -41,7 +41,7 @@ f.close()
 # Setup Logging
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(name)s] [%(levelname)s] %(message)s",
+    format="[%(asctime)s] [RTD-INFLUX] [%(levelname)s] %(message)s",
     handlers=[
         logging.FileHandler("logs/rtd-influx.log"),
         logging.StreamHandler()

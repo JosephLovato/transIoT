@@ -1,7 +1,5 @@
-// const http = require('http');
-// const app = require('./app');
-import http from 'http';
-import { app } from './app.js'
+import http from "http";
+import { app } from "./app.js";
 
 const normalizePort = val => {
     var port = parseInt(val, 10);
@@ -39,13 +37,12 @@ const onError = error => {
 };
 
 const onListening = () => {
-    const addr = server.address();
     const bind = typeof port === "string" ? "pipe " + port : "port " + port;
     console.debug(" Listening on " + bind);
 };
 
 const port = normalizePort(process.env.PORT || 3000);
-app.set('port', port);
+app.set("port", port);
 
 const server = http.createServer(app);
 server.on("error", onError);

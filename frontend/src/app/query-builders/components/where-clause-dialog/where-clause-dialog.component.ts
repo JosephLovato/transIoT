@@ -22,6 +22,7 @@ export class WhereClauseDialogComponent implements OnInit {
     currentValueOptions: string[] = [];
     currentValueFilteredOptions: Observable<string[]>;
     nodeType: NodeType = NodeType.Clause;
+    valueType: string | undefined = undefined;
 
     constructor(
         public dialogRef: MatDialogRef<WhereClauseDialogComponent, ClauseNode>,
@@ -32,6 +33,7 @@ export class WhereClauseDialogComponent implements OnInit {
         this.attributes = this.data.attributes;
         this.attributesIterable = Object.values(this.attributes);
         this.initializeForm(this.data.node);
+        this.valueType = this.data.node.whereClause.valueType;
     }
 
     // filter for value options selection
@@ -69,11 +71,16 @@ export class WhereClauseDialogComponent implements OnInit {
                 }
             });
 
-        // watch value changes on attribute to change properties of input
+        // watch value changes on attribute to change type of input field
         this.clauseForm.get('whereClause')?.get('attribute')?.valueChanges
-            .pipe(startWith(this.clauseForm.get('whereClause')?.get('attribute')?.getRawValue()))
-            .subscribe(() => {
-                // this.clauseForm.get('whereClause')?.get('value')?.ty
+            .pipe(startWith(this.clauseForm.get('whereClause')?.get('attribute')?.value))
+            .subscribe(attr => {
+                // don't do anything if the attribute is not set
+                if (!attr) {
+                    return;
+                }
+                this.valueType = this.attributes[attr].type;
+                console.log(this.valueType)
             });
 
         // change drop down list when attribute changes
@@ -87,6 +94,8 @@ export class WhereClauseDialogComponent implements OnInit {
                 // add value selection options if type is a string
                 if (this.attributes[attr].type == 'string') {
                     this.currentValueOptions = Object.keys(this.attributes[attr].possibleValues as { [key: string]: string });
+                } else {
+                    this.currentValueOptions = [];
                 }
                 // inject filter to drop down list
                 // TODO see if this can be done without non-null assertion

@@ -42,8 +42,14 @@
 
             <mat-form-field class="clause-key clause-member" appearance="fill">
                 <mat-label>Value</mat-label>
-                <input type="text" name="val"  aria-label="Number" matInput formControlName="value"
-                    [matAutocomplete]="auto">
+                <div *ngIf="valueType === undefined || valueType === 'string'">
+                    <input type="text" name="val"  aria-label="Number" matInput formControlName="value"
+                        [matAutocomplete]="auto">
+                </div>
+                <div *ngIf="valueType !== 'string'">
+                    <input type="number" name="val"  aria-label="Number" matInput formControlName="value"
+                        [matAutocomplete]="auto">
+                </div>
                 <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
                     <mat-option *ngFor="let option of currentValueFilteredOptions | async" [value]="option">
                         {{option}}

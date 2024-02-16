@@ -1,15 +1,29 @@
-'use strict'
+"use strict";
 /** @module influx-client 
- * Queries a data point in InfluxDB using the Javascript client library with Node.js.
+ * Queries data in InfluxDB using the Javascript client library with Node.js.
 **/
 
-import { InfluxDB } from '@influxdata/influxdb-client'
+import { InfluxDB, toFluxValue } from "@influxdata/influxdb-client";
 
 /** Environment variables and constants **/
-const token = process.env.INFLUX_TOKEN
-const url = process.env.INFLUX_HOST
-const org = "rtd-local"
+const token = process.env.INFLUX_TOKEN;
+const url = process.env.INFLUX_HOST;
+const org = "rtd-local";
 
+const validOperators = ["==", "!=", ">", "<", ">=", "<=", "LIKE"];
+const validLogicalOperators = ["and", "or", "not"];
+
+export class SanitizationError extends Error {
+    constructor(msg) {
+        super(msg);
+    }
+}
+
+export class ParameterSyntaxError extends Error {
+    constructor(msg) {
+        super(msg);
+    }
+}
 
 export class InfluxClient {
     queryApi = new InfluxDB({ url, token }).getQueryApi(org);
@@ -21,20 +35,52 @@ export class InfluxClient {
      */
     buildFilterExpression(whereClauses) {
         // logical operator
-        if (whereClauses.hasOwnProperty('logicalOperator')) {
-            let expr = '(';
+        if (Object.prototype.hasOwnProperty.call(whereClauses, "logicalOperator") &&
+            Object.prototype.hasOwnProperty.call(whereClauses, "children")) {
+            if (!validLogicalOperators.includes(whereClauses.logicalOperator)) {
+                throw new ParameterSyntaxError("Invalid logical operator in where clause: " + whereClauses.logicalOperator);
+            }
+            let expr = "(";
             let op = whereClauses.logicalOperator;
             // TODO: add special case for NOT operator
             whereClauses.children.forEach((clause, i) => {
                 expr += this.buildFilterExpression(clause);
                 if (i < whereClauses.children.length - 1) expr += ` ${op} `;
             });
-            expr += ')'
+            expr += ")";
             return expr;
             // clause
+        } else if (Object.prototype.hasOwnProperty.call(whereClauses, "attribute") &&
+            Object.prototype.hasOwnProperty.call(whereClauses, "operator") &&
+            Object.prototype.hasOwnProperty.call(whereClauses, "value")) {
+            // sanitize / validate
+            if (!validOperators.includes(whereClauses.operator)) {
+                console.log(whereClauses.operator);
+                throw new ParameterSyntaxError("Invalid operator in where clause: " + whereClauses.operator);
+            }
+            try {
+                var value = toFluxValue(whereClauses.value);
+                var attribute = toFluxValue(whereClauses.attribute);
+            } catch (error) {
+                throw new SanitizationError(error.message);
+            }
+            return `r[${attribute}] ${whereClauses.operator} ${value}`;
         } else {
-            return `r["${whereClauses.attribute}"] ${whereClauses.operator} ${whereClauses.value}`;
+            throw new ParameterSyntaxError("Where clauses query parameter not well formed");
         }
+    }
+
+    /**
+     * Sanitize and validate input time from string query parameter
+     * @param {string} time 
+     * @returns sanitized time as number (in epoch seconds)
+     */
+    sanitizeTime(time) {
+        let n = Number(time);
+        if (isNaN(n) || n < 0) {
+            throw new SanitizationError("Time must be a non-negative number");
+        }
+        return n;
     }
 
     /**
@@ -42,7 +88,7 @@ export class InfluxClient {
      * @param {string} filterExpr 
      * @returns json object with metadata and query result
      */
-    async queryCurrentVehiclePositions(filterExpr = 'true') {
+    async queryCurrentVehiclePositions(filterExpr = "true") {
         let fluxQuery = `
         from(bucket: "RTD-GTFS-NEW")
             |> range(start: -5m, stop: now())
@@ -59,7 +105,7 @@ export class InfluxClient {
             timeStamp: Date.now().valueOf(),
             numDataPoints: result.length,
             data: result
-        }
+        };
     }
 
     /**
@@ -67,10 +113,11 @@ export class InfluxClient {
      * @param {string} filterExpr 
      * @returns json object with metadata and query result
      */
-    async queryPastVehiclePositions(time, filterExpr = 'true') {
+    async queryPastVehiclePositions(time, filterExpr = "true") {
+        let sanitizeTime = this.sanitizeTime(time);
         let fluxQuery = `
         from(bucket: "RTD-GTFS-NEW")
-            |> range(start: ${time - 300}, stop: ${time})
+            |> range(start: ${sanitizeTime - 300}, stop: ${sanitizeTime})
             |> pivot(columnKey: ["_field"], rowKey: ["_time", "vehicle_id"], valueColumn: "_value")
             |> filter(fn: (r) => ${filterExpr})
             |> group(columns: ["vehicle_id"])
@@ -84,7 +131,7 @@ export class InfluxClient {
             timeStamp: Date.now().valueOf(),
             numDataPoints: result.length,
             data: result
-        }
+        };
     }
 
     /**
@@ -94,10 +141,12 @@ export class InfluxClient {
      * @param {string} filterExpr 
      * @returns 
      */
-    async queryIntervalVehiclePositions(timeStart, timeEnd, filterExpr = 'true') {
+    async queryIntervalVehiclePositions(timeStart, timeEnd, filterExpr = "true") {
+        let sanitizedTimeStart = this.sanitizeTime(timeStart);
+        let sanitizedTimeEnd = this.sanitizeTime(timeEnd);
         let fluxQuery = `
         from(bucket: "RTD-GTFS-NEW")
-            |> range(start: ${timeStart}, stop: ${timeEnd})
+            |> range(start: ${sanitizedTimeStart}, stop: ${sanitizedTimeEnd})
             |> pivot(columnKey: ["_field"], rowKey: ["_time", "vehicle_id"], valueColumn: "_value")
             |> filter(fn: (r) => ${filterExpr})
             |> group(columns: ["vehicle_id"])
@@ -118,7 +167,7 @@ export class InfluxClient {
         return {
             timeStamp: Date.now().valueOf(),
             data: results
-        }
+        };
     }
 
 }
