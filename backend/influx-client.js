@@ -43,6 +43,9 @@ export class InfluxClient {
             let expr = "(";
             let op = whereClauses.logicalOperator;
             // TODO: add special case for NOT operator
+            if (op === "not") {
+                throw new Error("\"not\" operator not yet supported");
+            }
             whereClauses.children.forEach((clause, i) => {
                 expr += this.buildFilterExpression(clause);
                 if (i < whereClauses.children.length - 1) expr += ` ${op} `;

@@ -59,7 +59,7 @@ app.get("/api/vehicle_position/current", async (req, res) => {
 app.get("/api/vehicle_position/past", async (req, res) => {
     try {
         if (req.query.pastTime === undefined) {
-            throw MissingQueryParameter("Missing \"pastTime\" query parameter");
+            throw new MissingQueryParameter("Missing \"pastTime\" query parameter");
         }
         let client = new InfluxClient();
         let filterExpr = "true";
@@ -76,10 +76,10 @@ app.get("/api/vehicle_position/past", async (req, res) => {
 app.get("/api/vehicle_position/interval", async (req, res) => {
     try {
         if (req.query.startTime === undefined) {
-            throw MissingQueryParameter("Missing \"startTime\" query parameter");
+            throw new MissingQueryParameter("Missing \"startTime\" query parameter");
         }
         if (req.query.endTime === undefined) {
-            throw MissingQueryParameter("Missing \"endTime\" query parameter");
+            throw new MissingQueryParameter("Missing \"endTime\" query parameter");
         }
         let client = new InfluxClient();
         let filterExpr = "true";
